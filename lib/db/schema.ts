@@ -8,6 +8,8 @@ import {
   uuid,
   integer,
   jsonb,
+  vector,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { InferModel } from "drizzle-orm/table";
@@ -102,6 +104,9 @@ export const agents = pgTable("agents", {
   geminiApiKey: varchar("gemini_api_key", { length: 255 }),
   anthropicApiKey: varchar("anthropic_api_key", { length: 255 }),
   openaiApiKey: varchar("openai_api_key", { length: 255 }),
+  // AI optimization settings
+  useRag: boolean("use_rag").default(true).notNull(), // Use RAG instead of feeding all content
+  ragTopK: integer("rag_top_k").default(3).notNull(), // Number of relevant chunks to retrieve
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -120,6 +125,28 @@ export const agentUrls = pgTable("agent_urls", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Embeddings for RAG (vector database)
+export const agentEmbeddings = pgTable(
+  "agent_embeddings",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    agentId: uuid("agent_id")
+      .notNull()
+      .references(() => agents.id, { onDelete: "cascade" }),
+    urlId: uuid("url_id")
+      .notNull()
+      .references(() => agentUrls.id, { onDelete: "cascade" }),
+    chunkText: text("chunk_text").notNull(),
+    chunkIndex: integer("chunk_index").notNull(),
+    embedding: vector("embedding", { dimensions: 384 }).notNull(), // all-MiniLM-L6-v2 produces 384-dimensional vectors
+    metadata: jsonb("metadata").$type<{ source: string; title?: string }>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    embeddingIndex: index("embedding_index").using("hnsw", table.embedding.op("vector_cosine_ops")),
+  })
+);
 
 // Conversations tracking
 export const conversations = pgTable("conversations", {
@@ -184,8 +211,8 @@ export const uiConfigs = pgTable("ui_configs", {
   showAgentAvatar: boolean("show_agent_avatar").default(true).notNull(),
   showTimestamp: boolean("show_timestamp").default(true).notNull(),
   showTypingIndicator: boolean("show_typing_indicator").default(true).notNull(),
-  enableDarkMode: boolean("enable_dark_mode").default(false).notNull(),
   allowAttachments: boolean("allow_attachments").default(false).notNull(),
+  maxOutputTokens: integer("max_output_tokens").default(1000).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

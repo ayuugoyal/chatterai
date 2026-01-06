@@ -1,4 +1,8 @@
 import * as cheerio from "cheerio";
+import { db } from "@/lib/db";
+import { agentEmbeddings } from "@/lib/db/schema";
+import { chunkText, generateEmbedding } from "@/lib/embeddings";
+import { eq, and } from "drizzle-orm";
 
 interface ScrapedData {
   title: string;
@@ -168,5 +172,84 @@ export async function scrapeWithCache(url: string): Promise<ScrapedData> {
   } finally {
     // Remove from queue after 5 seconds
     setTimeout(() => scrapeQueue.delete(url), 5000);
+  }
+}
+
+/**
+ * Process scraped content and generate embeddings for RAG
+ * @param agentId Agent ID
+ * @param urlId URL record ID
+ * @param scrapedData Scraped data from URL
+ */
+export async function processAndEmbedContent(
+  agentId: string,
+  urlId: string,
+  scrapedData: ScrapedData
+): Promise<void> {
+  try {
+    console.log(`Processing embeddings for agent ${agentId}, URL ${urlId}`);
+
+    // Prepare content for chunking (combine title, description, headings, and main content)
+    const fullContent = `
+Title: ${scrapedData.title}
+
+Description: ${scrapedData.description}
+
+${scrapedData.headings.length > 0 ? `Key Sections:\n${scrapedData.headings.join("\n")}\n` : ""}
+
+Content:
+${scrapedData.content}
+    `.trim();
+
+    // Delete existing embeddings for this URL (in case of re-scraping)
+    await db
+      .delete(agentEmbeddings)
+      .where(
+        and(
+          eq(agentEmbeddings.agentId, agentId),
+          eq(agentEmbeddings.urlId, urlId)
+        )
+      );
+
+    // Chunk the content (500 chars per chunk, 50 char overlap)
+    const chunks = chunkText(fullContent, 500, 50);
+    console.log(`Created ${chunks.length} chunks from content`);
+
+    // Generate embeddings for each chunk and store in database
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+
+      try {
+        // Generate embedding
+        const embedding = await generateEmbedding(chunk);
+
+        // Store in database
+        await db.insert(agentEmbeddings).values({
+          agentId,
+          urlId,
+          chunkText: chunk,
+          chunkIndex: i,
+          embedding: embedding,
+          metadata: {
+            source: scrapedData.title || "Unknown",
+            title: scrapedData.title,
+          },
+        });
+
+        console.log(`Embedded chunk ${i + 1}/${chunks.length}`);
+      } catch (error) {
+        console.error(`Error embedding chunk ${i}:`, error);
+        // Continue with other chunks even if one fails
+      }
+    }
+
+    console.log(`Successfully embedded ${chunks.length} chunks for URL ${urlId}`);
+  } catch (error) {
+    console.error("Error processing embeddings:", error);
+    throw new Error(
+      `Failed to process embeddings: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }

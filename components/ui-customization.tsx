@@ -46,7 +46,10 @@ const uiFormSchema = z.object({
   showAgentAvatar: z.boolean(),
   showTimestamp: z.boolean(),
   showTypingIndicator: z.boolean(),
-  allowAttachments: z.boolean()
+  allowAttachments: z.boolean(),
+
+  // AI Settings
+  maxOutputTokens: z.coerce.number().min(100).max(4000).default(1000)
 })
 
 type UIFormValues = z.infer<typeof uiFormSchema>
@@ -68,6 +71,7 @@ const defaultValues: UIFormValues = {
   showTimestamp: true,
   showTypingIndicator: true,
   allowAttachments: false,
+  maxOutputTokens: 1000,
 }
 
 export default function UICustomization({
@@ -110,6 +114,7 @@ export default function UICustomization({
         showTimestamp: existingConfig.showTimestamp ?? defaultValues.showTimestamp,
         showTypingIndicator: existingConfig.showTypingIndicator ?? defaultValues.showTypingIndicator,
         allowAttachments: existingConfig.allowAttachments ?? defaultValues.allowAttachments,
+        maxOutputTokens: existingConfig.maxOutputTokens || defaultValues.maxOutputTokens,
       }
 
       console.log("UICustomization: Setting form data:", formData)
@@ -602,6 +607,32 @@ export default function UICustomization({
                           }}
                         />
                       </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="maxOutputTokens"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max Output Tokens: {field.value}</FormLabel>
+                      <FormControl>
+                        <Slider
+                          min={100}
+                          max={4000}
+                          step={100}
+                          defaultValue={[field.value]}
+                          onValueChange={(values) => {
+                            field.onChange(values[0])
+                            updatePreview({ maxOutputTokens: values[0] })
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Maximum tokens for AI responses (higher = longer responses, higher cost)
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

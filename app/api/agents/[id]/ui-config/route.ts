@@ -54,6 +54,7 @@ export async function POST(
           showTimestamp: body.showTimestamp,
           showTypingIndicator: body.showTypingIndicator,
           allowAttachments: body.allowAttachments,
+          maxOutputTokens: body.maxOutputTokens,
           updatedAt: new Date(),
         })
         .where(eq(uiConfigs.id, existingConfig.id));
@@ -77,6 +78,7 @@ export async function POST(
         showTimestamp: body.showTimestamp,
         showTypingIndicator: body.showTypingIndicator,
         allowAttachments: body.allowAttachments,
+        maxOutputTokens: body.maxOutputTokens,
       });
     }
 

@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react"
 import { Send, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { getAgentBySlug } from "@/lib/actions/agent-actions"
 import { AgentTable } from "@/lib/db/schema"
@@ -14,7 +14,26 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
   const { slug } = params
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [agent, setAgent] = useState<AgentTable>({} as AgentTable)
-  const [uiConfig, setUiConfig] = useState<any>({
+  interface UIConfig {
+    primaryColor: string
+    secondaryColor: string
+    backgroundColor: string
+    textColor: string
+    buttonPosition: string
+    buttonSize: number
+    widgetWidth: number
+    widgetHeight: number
+    borderRadius: number
+    welcomeMessage: string
+    buttonIcon: string
+    headerTitle: string
+    showAgentAvatar: boolean
+    showTimestamp: boolean
+    showTypingIndicator: boolean
+    allowAttachments: boolean
+  }
+
+  const [uiConfig, setUiConfig] = useState<UIConfig>({
     primaryColor: "#0070f3",
     secondaryColor: "#f5f5f5",
     backgroundColor: "#ffffff",
@@ -30,7 +49,6 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
     showAgentAvatar: true,
     showTimestamp: true,
     showTypingIndicator: true,
-    enableDarkMode: false,
     allowAttachments: false,
   })
   const [isAgentLoading, setIsAgentLoading] = useState(true)
@@ -54,7 +72,7 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
     setSessionId(storedSessionId)
   }, [slug])
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
     api: `/api/chat/${slug}`,
     body: {
       sessionId,
@@ -102,7 +120,6 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
                 showAgentAvatar: config.showAgentAvatar ?? true,
                 showTimestamp: config.showTimestamp ?? true,
                 showTypingIndicator: config.showTypingIndicator ?? true,
-                enableDarkMode: config.enableDarkMode ?? false,
                 allowAttachments: config.allowAttachments ?? false,
               }
               setUiConfig(mergedConfig)
@@ -136,6 +153,7 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
     }
 
     fetchAgentDetails()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, setMessages, messages.length])
 
   // Scroll to bottom when messages change
@@ -189,7 +207,6 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
               <motion.div whileHover={{ scale: 1.05 }} className="relative group cursor-pointer">
                 <div className="absolute -inset-1 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-200" style={{ backgroundColor: uiConfig.primaryColor }}></div>
                 <Avatar className="h-12 w-12 border-2 relative" style={{ borderColor: uiConfig.backgroundColor }}>
-                  <AvatarImage src={"/bot.avif"} alt={agent?.name || "Agent"} className="object-cover" />
                   <AvatarFallback className="text-white text-lg font-bold" style={{ backgroundColor: uiConfig.primaryColor }}>
                     {agent?.name?.charAt(0) || "A"}
                   </AvatarFallback>
@@ -250,7 +267,6 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
                       <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-neutral-800 dark:to-neutral-900 text-xs">
                         AI
                       </AvatarFallback>
-                      <AvatarImage src="/bot.avif" />
                     </Avatar>
                   </div>
                 )}
@@ -262,7 +278,7 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
                     {group.role === "user" ? "You" : agent?.name}
                   </span>
 
-                  {group.messages.map((message, messageIndex) => (
+                  {group.messages.map((message) => (
                     <motion.div
                       key={message.id}
                       initial={{ opacity: 0, scale: 0.95, y: 5 }}
@@ -303,7 +319,6 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
                 <div className="flex-shrink-0 mt-1">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs" style={{ backgroundColor: `${uiConfig.primaryColor}20`, color: uiConfig.textColor }}>AI</AvatarFallback>
-                    <AvatarImage src="/bot.avif" />
                   </Avatar>
                 </div>
                 <div className="px-5 py-4 shadow-sm" style={{

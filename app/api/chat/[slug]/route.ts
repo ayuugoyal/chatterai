@@ -1,13 +1,14 @@
 import { getAgentBySlug } from "@/lib/actions/agent-actions";
 import { db } from "@/lib/db";
-import { conversations, messages as drizzleMessages } from "@/lib/db/schema";
+import { conversations, messages as drizzleMessages, agentEmbeddings, uiConfigs } from "@/lib/db/schema";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatOpenAI } from "@langchain/openai";
 import { LangChainAdapter } from "ai";
 import type { NextRequest } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { scrapeWithCache } from "@/lib/scraper";
+import { generateEmbedding } from "@/lib/embeddings";
 
 export async function POST(
   req: NextRequest,
@@ -68,12 +69,52 @@ export async function POST(
       });
     }
 
-    // Build enhanced system prompt with scraped content
+    // Fetch UI config for maxOutputTokens
+    const uiConfig = await db.query.uiConfigs.findFirst({
+      where: eq(uiConfigs.agentId, agent.id),
+    });
+    const maxOutputTokens = uiConfig?.maxOutputTokens || 1000;
+
+    // Build enhanced system prompt with RAG (Retrieval Augmented Generation)
     let enhancedSystemPrompt =
       agent.systemPrompt || "You are a helpful AI assistant.";
 
-    if (agent.urls && agent.urls.length > 0) {
-      // Limit context to prevent timeouts and rate limits (approx 15k chars ~3-4k tokens)
+    // Use RAG if enabled, otherwise fall back to old method
+    if (agent.useRag && lastUserMessage?.content) {
+      console.time("CHAT API: RAG - Generate Query Embedding");
+      try {
+        // Generate embedding for user query
+        const queryEmbedding = await generateEmbedding(lastUserMessage.content);
+        console.timeEnd("CHAT API: RAG - Generate Query Embedding");
+
+        console.time("CHAT API: RAG - Vector Search");
+        // Search for similar chunks using vector similarity
+        const topK = agent.ragTopK || 3;
+        const similarChunks = await db.execute(sql`
+          SELECT chunk_text, metadata, 1 - (embedding <=> ${sql.raw(`'[${queryEmbedding.join(",")}]'`)}) AS similarity
+          FROM agent_embeddings
+          WHERE agent_id = ${agent.id}
+          ORDER BY embedding <=> ${sql.raw(`'[${queryEmbedding.join(",")}]'`)}
+          LIMIT ${topK}
+        `);
+        console.timeEnd("CHAT API: RAG - Vector Search");
+
+        if (similarChunks.rows.length > 0) {
+          const retrievedContext = similarChunks.rows
+            .map((row: unknown, index: number) => {
+              const r = row as { chunk_text: string; metadata: { title?: string } };
+              return `### Source ${index + 1}: ${r.metadata?.title || "Unknown"}\n${r.chunk_text}`;
+            })
+            .join("\n\n---\n\n");
+
+          enhancedSystemPrompt += `\n\n## Knowledge Base (Retrieved Context)\n\nRelevant information from the knowledge base:\n\n${retrievedContext}\n\n## Instructions\n\n- Answer using ONLY plain text without any markdown formatting (no **, __, *, etc.)\n- Use the knowledge base above to answer questions accurately\n- If the information isn't in the knowledge base, be honest about it\n- Be conversational, helpful, and concise\n- Format your response as regular text that will be displayed to users`;
+        }
+      } catch (error) {
+        console.error("RAG error, falling back to non-RAG:", error);
+        // Fall back to non-RAG if embedding fails
+      }
+    } else if (agent.urls && agent.urls.length > 0) {
+      // Fallback: Use old method if RAG is disabled
       const MAX_CONTEXT_LENGTH = 15000;
       let currentLength = 0;
       const validUrls = agent.urls.filter((u) => u.scrapedContent);
@@ -81,17 +122,13 @@ export async function POST(
 
       for (const url of validUrls) {
         if (currentLength >= MAX_CONTEXT_LENGTH) break;
-
         const content = (url.scrapedContent || "").trim();
         if (!content) continue;
 
-        // If adding this entirely exceeds limit, truncate it
         if (currentLength + content.length > MAX_CONTEXT_LENGTH) {
           const remaining = MAX_CONTEXT_LENGTH - currentLength;
           if (remaining > 0) {
-            selectedContents.push(
-              content.substring(0, remaining) + "\n... (truncated)"
-            );
+            selectedContents.push(content.substring(0, remaining) + "\n... (truncated)");
             currentLength += remaining;
           }
           break;
@@ -102,9 +139,8 @@ export async function POST(
       }
 
       const scrapedContents = selectedContents.join("\n\n---\n\n");
-
       if (scrapedContents) {
-        enhancedSystemPrompt += `\n\n## Knowledge Base\n\nYou have access to the following information from the company's website(s). Use this information to answer user questions accurately:\n\n${scrapedContents}\n\n## Instructions\n\n- Always prioritize information from the knowledge base above when answering questions\n- If you're unsure or the information isn't in the knowledge base, be honest about it\n- Be conversational and helpful\n- If asked about products, services, or company information, refer to the knowledge base first`;
+        enhancedSystemPrompt += `\n\n## Knowledge Base\n\n${scrapedContents}\n\n## Instructions\n\n- Answer using plain text only (no markdown formatting)\n- Use the knowledge base to answer accurately\n- Be conversational and helpful`;
       }
     }
 
@@ -126,7 +162,7 @@ export async function POST(
       }
     }
 
-    // Select the appropriate model
+    // Select the appropriate model with maxOutputTokens configuration
     let model;
     switch (agent.modelProvider) {
       case "anthropic":
@@ -134,6 +170,7 @@ export async function POST(
           apiKey: agent.anthropicApiKey || process.env.ANTHROPIC_API_KEY,
           model: "claude-3-5-sonnet-20241022",
           temperature: 0.7,
+          maxTokens: maxOutputTokens,
         });
         break;
       case "openai":
@@ -141,6 +178,7 @@ export async function POST(
           apiKey: agent.openaiApiKey || process.env.OPENAI_API_KEY,
           model: "gpt-4o-mini",
           temperature: 0.7,
+          maxTokens: maxOutputTokens,
         });
         break;
       case "google":
@@ -150,7 +188,7 @@ export async function POST(
           apiKey: agent.geminiApiKey || process.env.GOOGLE_API_KEY,
           model: "gemini-2.5-flash-lite",
           temperature: 0.7,
-          maxOutputTokens: 2048,
+          maxOutputTokens: maxOutputTokens,
           callbacks: [
             {
               handleLLMEnd: async (output) => {

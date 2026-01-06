@@ -132,7 +132,7 @@
       // Create button
       const button = document.createElement("button");
       button.id = "chattercraft-widget-button";
-      button.innerHTML = getIconSVG(uiConfig.buttonIcon);
+      button.innerHTML = "";
       button.style.cssText = `
         position: fixed;
         ${buttonPositionStyle}
@@ -264,7 +264,6 @@
       button.addEventListener("click", () => {
         if (!isOpen) {
           // Show loading spinner in button
-          button.querySelector("svg").style.display = "none";
           spinner.style.display = "block";
 
           // Open chat container with animation
@@ -273,20 +272,13 @@
             container.style.opacity = "1";
             container.style.transform = "translateY(0) scale(1)";
 
-            // Hide spinner and show icon after animation completes
+            // Hide spinner after animation completes
             setTimeout(() => {
               spinner.style.display = "none";
-              button.querySelector("svg").style.display = "block";
 
               // Change button appearance when open (darker shade of primary color)
               button.style.backgroundColor = "#f44336";
               button.style.transform = "rotate(45deg)";
-              button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              `;
             }, 300);
           }, 50);
         } else {
@@ -297,7 +289,6 @@
           // Change button back to original state with animation
           button.style.backgroundColor = uiConfig.primaryColor;
           button.style.transform = "rotate(0deg)";
-          button.innerHTML = getIconSVG(uiConfig.buttonIcon);
 
           setTimeout(() => {
             container.style.display = "none";
@@ -359,7 +350,6 @@
         // Reset button state
         button.style.backgroundColor = uiConfig.primaryColor;
         button.style.transform = "rotate(0deg)";
-        button.innerHTML = getIconSVG(uiConfig.buttonIcon);
 
         setTimeout(() => {
           container.style.display = "none";

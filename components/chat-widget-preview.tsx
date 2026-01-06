@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bot, MessageSquare, Send, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,18 +23,22 @@ type ChatWidgetPreviewProps = {
     showAgentAvatar: boolean
     showTimestamp: boolean
     showTypingIndicator: boolean
-    enableDarkMode: boolean
     allowAttachments: boolean
   }
 }
 
 export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [messages, setMessages] = useState([
     { role: "assistant", content: config.welcomeMessage, timestamp: new Date() },
   ])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+
+  // Update welcome message when config changes
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: config.welcomeMessage, timestamp: new Date() }])
+  }, [config.welcomeMessage])
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return
@@ -142,23 +146,31 @@ export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
           {/* Header */}
           <div
             style={{
-              backgroundColor: config.primaryColor,
-              color: "white",
-              padding: "12px 16px",
+              backgroundColor: config.secondaryColor,
+              borderBottom: `1px solid ${config.primaryColor}20`,
+              color: config.textColor,
+              padding: "16px",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {config.showAgentAvatar && (
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <Bot size={16} />
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center relative"
+                  style={{ backgroundColor: config.primaryColor }}
+                >
+                  <Bot size={18} color="white" />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2" style={{ borderColor: config.backgroundColor }}></div>
                 </div>
               )}
-              <span className="font-medium">{config.headerTitle}</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-sm">{config.headerTitle}</span>
+                <span className="text-xs opacity-70">Online • AI Assistant</span>
+              </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
+            <button onClick={() => setIsOpen(false)} className="opacity-60 hover:opacity-100 transition-opacity">
               <X size={18} />
             </button>
           </div>
@@ -182,16 +194,18 @@ export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
                 )}
                 <div className="flex flex-col max-w-[70%]">
                   <div
-                    className={cn("rounded-lg p-3", message.role === "user" ? "rounded-tr-none" : "rounded-tl-none")}
+                    className="p-3.5 shadow-sm"
                     style={{
                       backgroundColor: message.role === "user" ? config.primaryColor : config.secondaryColor,
                       color: message.role === "user" ? "white" : config.textColor,
+                      borderRadius: `${config.borderRadius}px`,
+                      border: message.role === "assistant" ? `1px solid ${config.primaryColor}20` : "none",
                     }}
                   >
                     {message.content}
                   </div>
                   {config.showTimestamp && (
-                    <span className="text-xs text-gray-500 mt-1">{formatTime(message.timestamp)}</span>
+                    <span className="text-xs opacity-60 mt-1" style={{ color: config.textColor }}>{formatTime(message.timestamp)}</span>
                   )}
                 </div>
                 {message.role === "user" && config.showAgentAvatar && (
@@ -214,24 +228,26 @@ export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
                   </div>
                 )}
                 <div
-                  className="rounded-lg rounded-tl-none p-3 max-w-[70%]"
+                  className="p-3.5 shadow-sm"
                   style={{
                     backgroundColor: config.secondaryColor,
                     color: config.textColor,
+                    borderRadius: `${config.borderRadius}px`,
+                    border: `1px solid ${config.primaryColor}20`,
                   }}
                 >
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-1.5">
                     <div
-                      className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                      style={{ animationDelay: "0ms" }}
+                      className="w-2 h-2 rounded-full animate-bounce"
+                      style={{ backgroundColor: `${config.primaryColor}60`, animationDelay: "0ms" }}
                     ></div>
                     <div
-                      className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                      style={{ animationDelay: "150ms" }}
+                      className="w-2 h-2 rounded-full animate-bounce"
+                      style={{ backgroundColor: `${config.primaryColor}60`, animationDelay: "150ms" }}
                     ></div>
                     <div
-                      className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                      style={{ animationDelay: "300ms" }}
+                      className="w-2 h-2 rounded-full animate-bounce"
+                      style={{ backgroundColor: `${config.primaryColor}60`, animationDelay: "300ms" }}
                     ></div>
                   </div>
                 </div>
@@ -240,32 +256,35 @@ export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
           </div>
 
           {/* Input */}
-          <div
-            className="p-3 border-t"
-            style={{
-              borderColor: config.secondaryColor,
-            }}
-          >
-            <div className="flex gap-2">
+          <div className="p-4">
+            <div
+              className="flex items-center gap-2 p-1.5 shadow-md"
+              style={{
+                backgroundColor: config.secondaryColor,
+                border: `1px solid ${config.primaryColor}20`,
+                borderRadius: `${config.borderRadius * 3}px`,
+              }}
+            >
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message..."
+                placeholder="Ask me anything..."
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleSendMessage()
                   }
                 }}
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
                 style={{
-                  backgroundColor: config.secondaryColor,
                   color: config.textColor,
-                  borderColor: "transparent",
                 }}
               />
               <Button
                 onClick={handleSendMessage}
+                size="icon"
+                className="rounded-full h-10 w-10 shrink-0"
                 style={{
-                  backgroundColor: config.primaryColor,
+                  backgroundColor: inputValue.trim() ? config.primaryColor : `${config.primaryColor}40`,
                   color: "white",
                 }}
               >

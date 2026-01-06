@@ -16,6 +16,7 @@ import {
   scrapeWithCache,
   formatScrapedDataForAI,
   scrapeSitemap,
+  processAndEmbedContent,
 } from "@/lib/scraper";
 
 const agentSchema = z.object({
@@ -354,6 +355,11 @@ async function scrapeUrlForAgent(agentUrlId: string, url: string) {
     const scrapedData = await scrapeWithCache(url);
     const formattedContent = formatScrapedDataForAI(scrapedData);
 
+    // Get agent ID for this URL
+    const agentUrlRecord = await db.query.agentUrls.findFirst({
+      where: eq(agentUrls.id, agentUrlId),
+    });
+
     await db
       .update(agentUrls)
       .set({
@@ -362,6 +368,17 @@ async function scrapeUrlForAgent(agentUrlId: string, url: string) {
         status: "scraped",
       })
       .where(eq(agentUrls.id, agentUrlId));
+
+    // Generate embeddings for RAG (run in background)
+    if (agentUrlRecord) {
+      processAndEmbedContent(
+        agentUrlRecord.agentId,
+        agentUrlId,
+        scrapedData
+      ).catch((error) => {
+        console.error(`Failed to generate embeddings for URL ${url}:`, error);
+      });
+    }
   } catch (error) {
     console.error(`Failed to scrape URL ${url}:`, error);
     await db
