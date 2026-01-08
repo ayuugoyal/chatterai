@@ -244,7 +244,7 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
               backgroundColor: uiConfig.primaryColor + '20',
               color: uiConfig.primaryColor
             }}>
-              Powered by ChatterCraft
+              Powered by Chatter AI
             </span>
           </div>
         </div>
@@ -393,7 +393,7 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
             </Button>
           </form>
           <div className="text-center mt-3">
-            <span className="text-[10px] text-muted-foreground font-medium opacity-60">Powered by ChatterCraft AI</span>
+            <span className="text-[10px] text-muted-foreground font-medium opacity-60">Powered by Chatter AI</span>
           </div>
         </motion.div>
       </div>

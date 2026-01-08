@@ -8,7 +8,7 @@ import { SendIcon, Mic, PauseCircle, Bot } from "lucide-react"
 const demoMessages = [
   {
     role: "bot",
-    content: "Hello! I'm your ChattercraftAI assistant. How can I help you today?",
+    content: "Hello! I'm your Chatter AI assistant. How can I help you today?",
     delay: 0,
   },
   {
@@ -61,7 +61,7 @@ export default function ChatDemoSection() {
         {
           role: "bot",
           content:
-            "Thank you for your message! This is a demonstration of how ChattercraftAI responds to customer inquiries in real-time. In a real implementation, our AI would provide a helpful, relevant response to your specific question.",
+            "Thank you for your message! This is a demonstration of how Chatter AI responds to customer inquiries in real-time. In a real implementation, our AI would provide a helpful, relevant response to your specific question.",
           delay: 0,
         },
       ])
@@ -81,7 +81,7 @@ export default function ChatDemoSection() {
           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full uppercase">
             Interactive Demo
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Try ChattercraftAI In Action</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Try Chatter AI In Action</h2>
           <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
             Experience how our AI assistant handles customer inquiries in real-time.
           </p>
@@ -106,7 +106,7 @@ export default function ChatDemoSection() {
                   <Bot className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">ChattercraftAI Demo</h3>
+                  <h3 className="font-medium">Chatter AI Demo</h3>
                   <p className="text-xs text-muted-foreground">Online • Powered by AI</p>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function ChatDemoSection() {
             className="mt-8 text-center"
           >
             <p className="text-sm text-muted-foreground">
-              This is a demo of the ChattercraftAI interface. In a real implementation, our AI would provide responses
+              This is a demo of the Chatter AI interface. In a real implementation, our AI would provide responses
               tailored to your specific business and products.
             </p>
           </motion.div>

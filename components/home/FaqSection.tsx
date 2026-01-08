@@ -7,12 +7,12 @@ import Link from "next/link"
 
 const faqs = [
   {
-    question: "How does ChattercraftAI learn about my products and services?",
+    question: "How does Chatter AI learn about my products and services?",
     answer:
-      "ChattercraftAI can learn about your products and services by a prompt. You can manually this information through our dashboard.",
+      "Chatter AI can learn about your products and services by a prompt. You can manually this information through our dashboard.",
   },
   {
-    question: "Is any coding knowledge required to implement ChattercraftAI?",
+    question: "Is any coding knowledge required to implement Chatter AI?",
     answer:
       "No coding knowledge is required! For basic implementation, you simply copy and paste a single line of code into your website. We also offer no-code plugins for platforms like Shopify, WordPress, and Wix for even easier setup.",
   },
@@ -40,7 +40,7 @@ export default function FaqSection() {
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
           <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
-            Everything you need to know about ChattercraftAI. Can&apos;t find the answer you&apos;re looking for?
+            Everything you need to know about Chatter AI. Can&apos;t find the answer you&apos;re looking for?
             Contact <Link href={"https://ayuugoyal.tech/"} className="text-blue-400 hover:underline">@ayuugoyal</Link>
           </p>
         </motion.div>

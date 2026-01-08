@@ -58,7 +58,7 @@ export default function HowItWorksSection() {
           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full uppercase">
             Simple Setup
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How ChattercraftAI Works</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">How Chatter AI Works</h2>
           <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
             Get your AI assistant up and running in three simple steps.
           </p>

@@ -141,7 +141,7 @@ export default async function BillingPage() {
                   </Button>
                 ) : plan.name === "Enterprise" ? (
                   <Button variant="outline" className="w-full" asChild>
-                    <a href="mailto:support@chattercraft.ai">Contact Sales</a>
+                    <a href="mailto:support@chatterai.com">Contact Sales</a>
                   </Button>
                 ) : (
                   <UpgradeButton planId={plan.id} planName={plan.name} />

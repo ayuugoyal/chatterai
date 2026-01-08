@@ -7,8 +7,8 @@ import Script from "next/script"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "ChatterCraft - Create AI Chatbots for Your Website",
-  description: "Create, customize, and deploy AI chatbots on your website with ChatterCraft",
+  title: "Chatter AI - Create AI Chatbots for Your Website",
+  description: "Create, customize, and deploy AI chatbots on your website with Chatter AI",
 }
 
 export default function RootLayout({

@@ -55,7 +55,7 @@ export default async function DashboardLayout({
             <SidebarHeader>
               <div className="flex items-center gap-2 font-bold text-xl p-4">
                 <Bot className="h-6 w-6" />
-                <span className="group-data-[collapsible=icon]:hidden">ChatterCraft</span>
+                <span className="group-data-[collapsible=icon]:hidden">Chatter AI</span>
               </div>
             </SidebarHeader>
 

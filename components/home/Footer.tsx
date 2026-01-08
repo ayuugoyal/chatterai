@@ -49,7 +49,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             <div className="lg:col-span-2">
               <a href="#" className="text-2xl font-bold text-gradient inline-block mb-4">
-                ChattercraftAI
+                Chatter AI
               </a>
               <p className="text-foreground/70 max-w-md mb-6">
                 AI-powered customer support that answers questions, recommends products, and escalates complex issues
@@ -101,7 +101,7 @@ export default function Footer() {
 
         <div className="py-8 flex flex-col justify-center items-center">
           <p className="text-foreground/60 mb-4 md:mb-0">
-            © {new Date().getFullYear()} ChattercraftAI. All rights reserved.
+            © {new Date().getFullYear()} Chatter AI. All rights reserved.
           </p>
           <p className="text-foreground/60 mb-4 md:mb-0">
             made with 💖 by <Link href={"https://ayuugoyal.tech"} className="text-blue-400 hover:underline">@ayuugoyal</Link>

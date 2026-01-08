@@ -24,7 +24,7 @@ const features = [
   // },
   {
     title: "Simple Integration",
-    description: "Just one line of code to add ChattercraftAI to any website, with special plugins for Shopify and WordPress.",
+    description: "Just one line of code to add Chatter AI to any website, with special plugins for Shopify and WordPress.",
     icon: Code,
     color: "bg-green-500/10 text-green-500",
   },

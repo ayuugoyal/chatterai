@@ -10,7 +10,7 @@
 
       if (!slug) {
         console.error(
-          "ChatterCraft: Missing data-slug attribute on script tag"
+          "Chatter AI: Missing data-slug attribute on script tag"
         );
         return;
       }
@@ -61,7 +61,7 @@
           }
         }
       } catch (error) {
-        console.error("ChatterCraft: Failed to fetch UI config, using defaults", error);
+        console.error("Chatter AI: Failed to fetch UI config, using defaults", error);
       }
 
       // Helper function to convert hex to RGB
@@ -131,7 +131,7 @@
 
       // Create button
       const button = document.createElement("button");
-      button.id = "chattercraft-widget-button";
+      button.id = "chatter-ai-widget-button";
       button.innerHTML = "";
       button.style.cssText = `
         position: fixed;
@@ -168,7 +168,7 @@
 
       // Create iframe container
       const container = document.createElement("div");
-      container.id = "chattercraft-widget-container";
+      container.id = "chatter-ai-widget-container";
       container.style.cssText = `
         position: fixed;
         ${containerPositionStyle}
@@ -368,7 +368,7 @@
       // Handle messages from iframe
       window.addEventListener("message", (event) => {
         // Check if the message is from our iframe
-        if (event.data && event.data.type === "chattercraft-widget") {
+        if (event.data && event.data.type === "chatter-ai-widget") {
           // Handle different message types
           switch (event.data.action) {
             case "close":

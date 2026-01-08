@@ -12,36 +12,37 @@ async function seed() {
     {
       name: "Free",
       price: 0,
-      maxAgents: 1,
-      maxConversations: 100,
-      maxUrlsPerAgent: 3,
+      maxAgents: 5,
+      maxConversations: 250, // 50 conversations per agent * 5 agents
+      maxUrlsPerAgent: 5,
       features: [
-        "1 AI Agent",
-        "100 conversations/month",
-        "3 URLs per agent",
-        "Basic support",
+        "5 AI Agents",
+        "250 conversations/month",
+        "5 URLs per agent",
+        "Email support",
         "Community access",
       ],
     },
     {
       name: "Pro",
-      price: 4900, // $49.00
-      maxAgents: 10,
-      maxConversations: 5000,
-      maxUrlsPerAgent: 20,
+      price: 50000, // ₹500.00 (in paise for Razorpay)
+      maxAgents: 30,
+      maxConversations: 30000, // 1000 conversations per agent * 30 agents
+      maxUrlsPerAgent: 50,
       features: [
-        "10 AI Agents",
-        "5,000 conversations/month",
-        "20 URLs per agent",
+        "30 AI Agents",
+        "30,000 conversations/month",
+        "50 URLs per agent",
         "Priority support",
         "Advanced analytics",
         "Custom branding",
         "API access",
+        "Remove 'Powered by Chatter AI' badge",
       ],
     },
     {
       name: "Enterprise",
-      price: 19900, // $199.00
+      price: 200000, // ₹2,000.00 (in paise for Razorpay)
       maxAgents: -1, // unlimited
       maxConversations: -1, // unlimited
       maxUrlsPerAgent: -1, // unlimited
@@ -56,6 +57,7 @@ async function seed() {
         "Dedicated account manager",
         "Custom integrations",
         "SLA guarantee",
+        "White-label solution",
       ],
     },
   ];

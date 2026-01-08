@@ -14,7 +14,7 @@ export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
 
   const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME || "ChatterCraft"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
+    from: `"${process.env.EMAIL_FROM_NAME || "Chatter AI"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify your email address",
     html: `
@@ -27,7 +27,7 @@ export async function sendVerificationEmail(email: string, token: string) {
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0;">Welcome to ChatterCraft!</h1>
+            <h1 style="color: white; margin: 0;">Welcome to Chatter AI!</h1>
           </div>
 
           <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
@@ -53,26 +53,26 @@ export async function sendVerificationEmail(email: string, token: string) {
             </p>
 
             <p style="color: #666; font-size: 14px; margin-top: 30px;">
-              This link will expire in 24 hours. If you didn't create an account with ChatterCraft, you can safely ignore this email.
+              This link will expire in 24 hours. If you didn't create an account with Chatter AI, you can safely ignore this email.
             </p>
           </div>
 
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} ChatterCraft. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Chatter AI. All rights reserved.</p>
           </div>
         </body>
       </html>
     `,
     text: `
-      Welcome to ChatterCraft!
+      Welcome to Chatter AI!
 
       Thank you for signing up! Please verify your email address by clicking the link below:
 
       ${verificationUrl}
 
-      This link will expire in 24 hours. If you didn't create an account with ChatterCraft, you can safely ignore this email.
+      This link will expire in 24 hours. If you didn't create an account with Chatter AI, you can safely ignore this email.
 
-      © ${new Date().getFullYear()} ChatterCraft. All rights reserved.
+      © ${new Date().getFullYear()} Chatter AI. All rights reserved.
     `,
   };
 
@@ -89,7 +89,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${token}`;
 
   const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME || "ChatterCraft"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
+    from: `"${process.env.EMAIL_FROM_NAME || "Chatter AI"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
     to: email,
     subject: "Reset your password",
     html: `
@@ -133,7 +133,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
           </div>
 
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} ChatterCraft. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Chatter AI. All rights reserved.</p>
           </div>
         </body>
       </html>
@@ -147,7 +147,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
       This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
 
-      © ${new Date().getFullYear()} ChatterCraft. All rights reserved.
+      © ${new Date().getFullYear()} Chatter AI. All rights reserved.
     `,
   };
 
@@ -162,20 +162,20 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
 export async function sendWelcomeEmail(email: string, name: string) {
   const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME || "ChatterCraft"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
+    from: `"${process.env.EMAIL_FROM_NAME || "Chatter AI"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Welcome to ChatterCraft!",
+    subject: "Welcome to Chatter AI!",
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Welcome to ChatterCraft</title>
+          <title>Welcome to Chatter AI</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0;">Welcome to ChatterCraft!</h1>
+            <h1 style="color: white; margin: 0;">Welcome to Chatter AI!</h1>
           </div>
 
           <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
@@ -209,13 +209,13 @@ export async function sendWelcomeEmail(email: string, name: string) {
           </div>
 
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} ChatterCraft. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Chatter AI. All rights reserved.</p>
           </div>
         </body>
       </html>
     `,
     text: `
-      Welcome to ChatterCraft!
+      Welcome to Chatter AI!
 
       Hi ${name}!
 
@@ -231,7 +231,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
 
       If you have any questions, feel free to reach out to our support team.
 
-      © ${new Date().getFullYear()} ChatterCraft. All rights reserved.
+      © ${new Date().getFullYear()} Chatter AI. All rights reserved.
     `,
   };
 
