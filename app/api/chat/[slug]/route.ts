@@ -1,6 +1,10 @@
 import { getAgentBySlug } from "@/lib/actions/agent-actions";
 import { db } from "@/lib/db";
-import { conversations, messages as drizzleMessages, uiConfigs } from "@/lib/db/schema";
+import {
+  conversations,
+  messages as drizzleMessages,
+  uiConfigs,
+} from "@/lib/db/schema";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatOpenAI } from "@langchain/openai";
@@ -14,7 +18,7 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const { messages, sessionId, currentPageUrl } = await req.json();
+    const { messages, sessionId } = await req.json();
     const slug = params.slug;
     console.time("CHAT API: Fetch Agent");
     const agent = await getAgentBySlug(slug);
@@ -60,7 +64,11 @@ export async function POST(
 
     // Save User Message (only if saveConversations is enabled)
     const lastUserMessage = messages[messages.length - 1];
-    if (conversationId && lastUserMessage.role === "user" && agent.saveConversations) {
+    if (
+      conversationId &&
+      lastUserMessage.role === "user" &&
+      agent.saveConversations
+    ) {
       await db.insert(drizzleMessages).values({
         conversationId,
         role: "user",
@@ -93,7 +101,9 @@ export async function POST(
         if (currentLength + content.length > MAX_CONTEXT_LENGTH) {
           const remaining = MAX_CONTEXT_LENGTH - currentLength;
           if (remaining > 0) {
-            selectedContents.push(content.substring(0, remaining) + "\n... (truncated)");
+            selectedContents.push(
+              content.substring(0, remaining) + "\n... (truncated)"
+            );
             currentLength += remaining;
           }
           break;
@@ -106,24 +116,6 @@ export async function POST(
       const scrapedContents = selectedContents.join("\n\n---\n\n");
       if (scrapedContents) {
         enhancedSystemPrompt += `\n\n## Knowledge Base\n\n${scrapedContents}\n\n## Instructions\n\n- Answer using plain text only (no markdown formatting)\n- Use the knowledge base to answer accurately\n- Be conversational and helpful`;
-      }
-    }
-
-    // Add current page context if provided
-    if (currentPageUrl) {
-      try {
-        console.log("CHAT API: Scraping current page:", currentPageUrl);
-        const pageData = await scrapeWithCache(currentPageUrl);
-
-        if (pageData) {
-          const pageContext = `# Current Page Context\n\n**Title:** ${pageData.title || 'N/A'}\n**URL:** ${currentPageUrl}\n\n${pageData.content || ''}`;
-
-          // Add to beginning of knowledge base with higher priority
-          enhancedSystemPrompt += `\n\n## Current Page Information\n\nThe user is currently viewing this page. Use this context to provide more relevant answers:\n\n${pageContext.substring(0, 5000)}\n\n`;
-        }
-      } catch (error) {
-        console.error("Error scraping current page:", error);
-        // Continue without page context if scraping fails
       }
     }
 
@@ -181,7 +173,7 @@ export async function POST(
       ...messages,
     ];
 
-    console.log("CHAT API: Context size:", enhancedSystemPrompt.length);
+    console.log("CHAT API: Context size:", enhancedSystemPrompt);
 
     // Create streaming chain
     const stream = await model.stream(messagesWithSystem);

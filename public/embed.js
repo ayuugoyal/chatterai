@@ -21,374 +21,386 @@
 
       // Fetch agent details and UI config
       let agentId = null;
+      let agentName = "AI Assistant";
       let uiConfig = {
-        primaryColor: "#0070f3",
+        primaryColor: "#8b5cf6",
         secondaryColor: "#f5f5f5",
         backgroundColor: "#ffffff",
         textColor: "#333333",
-        buttonPosition: "bottom-right",
-        buttonSize: 60,
-        widgetWidth: 380,
-        widgetHeight: 600,
-        borderRadius: 12,
-        buttonIcon: "message",
+        borderRadius: 16,
+        welcomeMessage: "Hello! How can I help you today?",
+        headerTitle: "Chat Support",
       };
 
       try {
         // First fetch agent by slug to get the ID
         const agentResponse = await fetch(`${baseUrl}/api/agents/slug/${slug}`);
-        if (agentResponse.ok) {
-          const agentData = await agentResponse.json();
-          agentId = agentData.id;
+        if (!agentResponse.ok) {
+          console.error(
+            `Chatter AI: Agent with slug "${slug}" not found. Please check your embed code.`
+          );
+          return;
+        }
 
-          // Now fetch UI config using the agent ID
-          const configResponse = await fetch(`${baseUrl}/api/agents/${agentId}/ui-config`);
-          if (configResponse.ok) {
-            const config = await configResponse.json();
-            // Merge with defaults
-            uiConfig = {
-              primaryColor: config.primaryColor || uiConfig.primaryColor,
-              secondaryColor: config.secondaryColor || uiConfig.secondaryColor,
-              backgroundColor: config.backgroundColor || uiConfig.backgroundColor,
-              textColor: config.textColor || uiConfig.textColor,
-              buttonPosition: config.buttonPosition || uiConfig.buttonPosition,
-              buttonSize: config.buttonSize || uiConfig.buttonSize,
-              widgetWidth: config.widgetWidth || uiConfig.widgetWidth,
-              widgetHeight: config.widgetHeight || uiConfig.widgetHeight,
-              borderRadius: config.borderRadius || uiConfig.borderRadius,
-              buttonIcon: config.buttonIcon || uiConfig.buttonIcon,
-            };
-          }
+        const agentData = await agentResponse.json();
+        agentId = agentData.id;
+        agentName = agentData.name || "AI Assistant";
+
+        // Now fetch UI config using the agent ID
+        const configResponse = await fetch(`${baseUrl}/api/agents/${agentId}/ui-config`);
+        if (configResponse.ok) {
+          const config = await configResponse.json();
+          // Merge with defaults
+          uiConfig = {
+            primaryColor: config.primaryColor || uiConfig.primaryColor,
+            secondaryColor: config.secondaryColor || uiConfig.secondaryColor,
+            backgroundColor: config.backgroundColor || uiConfig.backgroundColor,
+            textColor: config.textColor || uiConfig.textColor,
+            borderRadius: config.borderRadius || uiConfig.borderRadius,
+            welcomeMessage: config.welcomeMessage || uiConfig.welcomeMessage,
+            headerTitle: config.headerTitle || agentName,
+          };
         }
       } catch (error) {
-        console.error("Chatter AI: Failed to fetch UI config, using defaults", error);
+        console.error("Chatter AI: Failed to load chat widget", error);
+        return;
       }
 
-      // Helper function to convert hex to RGB
-      const hexToRgb = (hex) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16)
-        } : { r: 0, g: 112, b: 243 }; // Default blue
-      };
-
-      // Get icon SVG based on buttonIcon config
-      const getIconSVG = (iconType) => {
-        const icons = {
-          message: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-          chat: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
-          help: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-          support: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/></svg>',
-        };
-        return icons[iconType] || icons.message;
-      };
-
-      // Parse button position
-      const [vertical, horizontal] = uiConfig.buttonPosition.split("-");
-      const buttonPositionStyle = `
-        ${vertical}: 20px;
-        ${horizontal}: 20px;
-      `;
-
-      // Parse container position
-      const containerPositionStyle = vertical === "bottom"
-        ? `${vertical}: ${uiConfig.buttonSize + 30}px;`
-        : `${vertical}: ${uiConfig.buttonSize + 30}px;`;
-      const containerHorizontalStyle = `${horizontal}: 20px;`;
-
-      // Add CSS animations to the document
+      // Add CSS styles to the document
       const styleSheet = document.createElement("style");
       styleSheet.textContent = `
-        @keyframes pulse {
-          0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-          50% { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
-          100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        @keyframes chatter-fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px) scale(0.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes chatter-fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
         }
 
-        @keyframes fadeOut {
-          from { opacity: 1; transform: translateY(0) scale(1); }
-          to { opacity: 0; transform: translateY(10px) scale(0.98); }
+        @keyframes chatter-slideUp {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
         }
 
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes chatter-slideDown {
+          from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+          }
         }
 
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
+        .chatter-ai-widget * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        .chatter-ai-hidden {
+          display: none !important;
+        }
+
+        .chatter-ai-floating-input {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 9998;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 24px;
+          background: ${uiConfig.backgroundColor};
+          backdrop-filter: blur(12px);
+          border: 1px solid ${uiConfig.primaryColor}30;
+          border-radius: 999px;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+          cursor: text;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+          max-width: 500px;
+          width: 90%;
+        }
+
+        .chatter-ai-floating-input:hover {
+          transform: translateX(-50%) scale(1.02);
+          box-shadow: 0 6px 32px rgba(0, 0, 0, 0.15);
+          border-color: ${uiConfig.primaryColor}50;
+        }
+
+        .chatter-ai-floating-input input {
+          flex: 1;
+          border: none;
+          outline: none;
+          background: transparent;
+          font-size: 15px;
+          color: ${uiConfig.textColor};
+          font-family: inherit;
+        }
+
+        .chatter-ai-floating-input input::placeholder {
+          color: ${uiConfig.textColor};
+          opacity: 0.65;
+        }
+
+        .chatter-ai-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(8px);
+          z-index: 9998;
+          animation: chatter-fadeIn 0.3s ease;
+        }
+
+        .chatter-ai-backdrop.closing {
+          animation: chatter-fadeOut 0.3s ease forwards;
+        }
+
+        .chatter-ai-chat-window {
+          position: fixed;
+          bottom: 90px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 90%;
+          max-width: 600px;
+          height: 600px;
+          max-height: 70vh;
+          z-index: 9999;
+          background: ${uiConfig.backgroundColor};
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          animation: chatter-slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chatter-ai-chat-window.closing {
+          animation: chatter-slideDown 0.3s cubic-bezier(0.6, 0, 0.8, 0.2) forwards;
+        }
+
+        .chatter-ai-close-btn {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          transition: all 0.2s ease;
+        }
+
+        .chatter-ai-close-btn:hover {
+          background: ${uiConfig.primaryColor}15;
+        }
+
+        .chatter-ai-close-btn:active {
+          transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+          .chatter-ai-floating-input {
+            max-width: calc(100% - 32px);
+          }
+
+          .chatter-ai-chat-window {
+            width: 95%;
+            height: 80vh;
+            max-height: 600px;
+            bottom: 80px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .chatter-ai-chat-window {
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            bottom: 0;
+            left: 0;
+            transform: none;
+            border-radius: 0;
+          }
+
+          .chatter-ai-floating-input {
+            bottom: 16px;
+          }
         }
       `;
       document.head.appendChild(styleSheet);
 
-      // Create button
-      const button = document.createElement("button");
-      button.id = "chatter-ai-widget-button";
-      button.innerHTML = "";
-      button.style.cssText = `
-        position: fixed;
-        ${buttonPositionStyle}
-        width: ${uiConfig.buttonSize}px;
-        height: ${uiConfig.buttonSize}px;
-        border-radius: 50%;
-        background-color: ${uiConfig.primaryColor};
-        color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9090;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        animation: pulse 2s infinite ease-in-out;
-      `;
+      // Create floating input container
+      const floatingInput = document.createElement("div");
+      floatingInput.className = "chatter-ai-widget chatter-ai-floating-input";
 
-      // Create loading spinner
-      const spinner = document.createElement("div");
-      spinner.style.cssText = `
-        width: 24px;
-        height: 24px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s infinite linear;
-        position: absolute;
-        display: none;
-      `;
-      button.appendChild(spinner);
+      // Create search icon
+      const searchIcon = document.createElement("div");
+      searchIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${uiConfig.textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6; flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`;
 
-      // Create iframe container
-      const container = document.createElement("div");
-      container.id = "chatter-ai-widget-container";
-      container.style.cssText = `
-        position: fixed;
-        ${containerPositionStyle}
-        ${containerHorizontalStyle}
-        width: ${uiConfig.widgetWidth}px;
-        height: ${uiConfig.widgetHeight}px;
-        max-height: 70vh;
-        border-radius: ${uiConfig.borderRadius}px;
-        overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        z-index: 9999;
-        display: none;
-        opacity: 0;
-        transform: translateY(10px) scale(0.98);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      `;
+      // Create input field
+      const inputField = document.createElement("input");
+      inputField.type = "text";
+      inputField.placeholder = `Ask ${uiConfig.headerTitle} anything...`;
+      inputField.setAttribute("aria-label", "Chat input");
 
-      // Create iframe
-      const iframe = document.createElement("iframe");
+      floatingInput.appendChild(searchIcon);
+      floatingInput.appendChild(inputField);
 
-      // Create loading overlay for iframe
-      const loadingOverlay = document.createElement("div");
-      loadingOverlay.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: ${uiConfig.backgroundColor};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        transition: opacity 0.5s ease;
-      `;
+      // Create backdrop
+      const backdrop = document.createElement("div");
+      backdrop.className = "chatter-ai-widget chatter-ai-backdrop chatter-ai-hidden";
 
-      const loadingSpinner = document.createElement("div");
-      const rgbColor = hexToRgb(uiConfig.primaryColor);
-      loadingSpinner.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.2);
-        border-radius: 50%;
-        border-top-color: ${uiConfig.primaryColor};
-        animation: spin 1s infinite linear;
-      `;
+      // Create chat window
+      const chatWindow = document.createElement("div");
+      chatWindow.className = "chatter-ai-widget chatter-ai-chat-window chatter-ai-hidden";
 
-      loadingOverlay.appendChild(loadingSpinner);
-      container.appendChild(loadingOverlay);
-
-      iframe.src = `${baseUrl}/chat/${slug}`;
-      iframe.style.cssText = `
-        width: 100%;
-        height: 100%;
-        border: none;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-      `;
-
-      // Hide loading overlay when iframe is loaded
-      iframe.onload = () => {
-        iframe.style.opacity = "1";
-        setTimeout(() => {
-          loadingOverlay.style.opacity = "0";
-          setTimeout(() => {
-            loadingOverlay.style.display = "none";
-          }, 500);
-        }, 300);
-      };
-
-      container.appendChild(iframe);
-      document.body.appendChild(button);
-      document.body.appendChild(container);
-
-      // Button hover effects
-      button.addEventListener("mouseenter", () => {
-        button.style.animation = "none";
-        button.style.transform = "scale(1.1)";
-        button.style.boxShadow = "0 6px 16px rgba(0, 0, 0, 0.15)";
-      });
-
-      button.addEventListener("mouseleave", () => {
-        button.style.transform = "scale(1)";
-        button.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
-        // Restart the pulse animation after a short delay
-        setTimeout(() => {
-          button.style.animation = "pulse 2s infinite ease-in-out";
-        }, 300);
-      });
-
-      // Toggle chat widget with animations
-      let isOpen = false;
-      button.addEventListener("click", () => {
-        if (!isOpen) {
-          // Show loading spinner in button
-          spinner.style.display = "block";
-
-          // Open chat container with animation
-          container.style.display = "block";
-          setTimeout(() => {
-            container.style.opacity = "1";
-            container.style.transform = "translateY(0) scale(1)";
-
-            // Hide spinner after animation completes
-            setTimeout(() => {
-              spinner.style.display = "none";
-
-              // Change button appearance when open (darker shade of primary color)
-              button.style.backgroundColor = "#f44336";
-              button.style.transform = "rotate(45deg)";
-            }, 300);
-          }, 50);
-        } else {
-          // Close animation
-          container.style.opacity = "0";
-          container.style.transform = "translateY(10px) scale(0.98)";
-
-          // Change button back to original state with animation
-          button.style.backgroundColor = uiConfig.primaryColor;
-          button.style.transform = "rotate(0deg)";
-
-          setTimeout(() => {
-            container.style.display = "none";
-
-            // Restart the pulse animation
-            setTimeout(() => {
-              button.style.animation = "pulse 2s infinite ease-in-out";
-            }, 300);
-          }, 300);
-        }
-
-        isOpen = !isOpen;
-      });
-
-      // Add close button to container with animation
+      // Create close button
       const closeButton = document.createElement("button");
+      closeButton.className = "chatter-ai-close-btn";
+      closeButton.setAttribute("aria-label", "Close chat");
       closeButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${uiConfig.textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       `;
-      closeButton.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background-color: rgba(0, 0, 0, 0.1);
+
+      // Create iframe for chat
+      const chatIframe = document.createElement("iframe");
+      chatIframe.src = `${baseUrl}/chat/${slug}`;
+      chatIframe.style.cssText = `
+        width: 100%;
+        height: 100%;
         border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        transition: all 0.2s ease;
-        opacity: 0.7;
+        display: block;
+        border-radius: 20px;
       `;
+      chatIframe.setAttribute("allow", "clipboard-read; clipboard-write");
 
-      closeButton.addEventListener("mouseenter", () => {
-        closeButton.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
-        closeButton.style.opacity = "1";
-        closeButton.style.transform = "scale(1.1)";
-      });
+      // Assemble chat window
+      chatWindow.appendChild(closeButton);
+      chatWindow.appendChild(chatIframe);
 
-      closeButton.addEventListener("mouseleave", () => {
-        closeButton.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
-        closeButton.style.opacity = "0.7";
-        closeButton.style.transform = "scale(1)";
-      });
+      // Add to document
+      document.body.appendChild(floatingInput);
+      document.body.appendChild(backdrop);
+      document.body.appendChild(chatWindow);
 
-      closeButton.addEventListener("click", (e) => {
-        e.stopPropagation();
+      // Event handlers
+      let isOpen = false;
 
-        // Add closing animation
-        container.style.animation = "fadeOut 0.3s forwards";
+      const openChat = () => {
+        if (isOpen) return;
+        isOpen = true;
 
-        // Reset button state
-        button.style.backgroundColor = uiConfig.primaryColor;
-        button.style.transform = "rotate(0deg)";
+        // Hide floating input
+        floatingInput.classList.add("chatter-ai-hidden");
+
+        // Show backdrop and chat window
+        backdrop.classList.remove("chatter-ai-hidden", "closing");
+        chatWindow.classList.remove("chatter-ai-hidden", "closing");
+
+        // Prevent body scroll
+        document.body.style.overflow = "hidden";
+      };
+
+      const closeChat = () => {
+        if (!isOpen) return;
+
+        // Add closing animations
+        backdrop.classList.add("closing");
+        chatWindow.classList.add("closing");
 
         setTimeout(() => {
-          container.style.display = "none";
-          container.style.animation = "";
           isOpen = false;
 
-          // Restart the pulse animation
-          setTimeout(() => {
-            button.style.animation = "pulse 2s infinite ease-in-out";
-          }, 300);
-        }, 300);
+          // Hide elements
+          backdrop.classList.add("chatter-ai-hidden");
+          backdrop.classList.remove("closing");
+          chatWindow.classList.add("chatter-ai-hidden");
+          chatWindow.classList.remove("closing");
+
+          // Show floating input
+          floatingInput.classList.remove("chatter-ai-hidden");
+
+          // Clear input field
+          inputField.value = "";
+
+          // Restore body scroll
+          document.body.style.overflow = "";
+        }, 300); // Match animation duration
+      };
+
+      // Click or focus on input to open chat
+      inputField.addEventListener("click", openChat);
+      inputField.addEventListener("focus", openChat);
+      floatingInput.addEventListener("click", () => {
+        inputField.focus();
+        openChat();
       });
 
-      container.appendChild(closeButton);
+      // Allow typing in input (opens chat on first character)
+      inputField.addEventListener("input", (e) => {
+        if (e.target.value.length > 0 && !isOpen) {
+          openChat();
+        }
+      });
 
-      // Handle messages from iframe
+      // Enter key to open chat
+      inputField.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          openChat();
+        }
+      });
+
+      // Click close button to close chat
+      closeButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeChat();
+      });
+
+      // Click backdrop to close chat
+      backdrop.addEventListener("click", closeChat);
+
+      // ESC key to close chat
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && isOpen) {
+          closeChat();
+        }
+      });
+
+      // Listen for messages from iframe
       window.addEventListener("message", (event) => {
-        // Check if the message is from our iframe
-        if (event.data && event.data.type === "chatter-ai-widget") {
-          // Handle different message types
-          switch (event.data.action) {
-            case "close":
-              // Trigger close animation
-              closeButton.click();
-              break;
-            case "bounce":
-              // Add a bounce animation to the button
-              button.style.animation = "bounce 0.5s ease";
-              setTimeout(() => {
-                button.style.animation = "pulse 2s infinite ease-in-out";
-              }, 500);
-              break;
-            // Add more actions as needed
-          }
+        if (event.origin !== baseUrl) return;
+
+        if (event.data.type === "chatter-close") {
+          closeChat();
         }
       });
     }
 
-    // Initialize widget when DOM is loaded
+    // Initialize widget when DOM is ready
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", createChatWidget);
     } else {

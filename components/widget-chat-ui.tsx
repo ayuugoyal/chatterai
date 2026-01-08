@@ -68,7 +68,6 @@ export function WidgetChatUI({
     api: `/api/chat/${slug}`,
     body: {
       sessionId,
-      currentPageUrl: typeof window !== "undefined" ? window.location.href : undefined,
     },
     initialMessages: [
       {

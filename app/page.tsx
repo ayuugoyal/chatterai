@@ -11,6 +11,7 @@ import PricingSection from '@/components/home/PricingSection';
 import CtaSection from '@/components/home/CtaSection';
 import Footer from '@/components/home/Footer';
 import { ScrollProgress } from '@/components/magicui/scroll-progress';
+import { FloatingCommandInput } from '@/components/floating-command-input';
 
 export default function Home() {
   // Implement smooth scrolling for anchor links
@@ -54,6 +55,7 @@ export default function Home() {
         <CtaSection />
       </main>
       <Footer />
+      <FloatingCommandInput />
     </motion.div>
   );
 };
