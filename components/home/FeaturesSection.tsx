@@ -1,45 +1,45 @@
 "use client"
 
 import { motion } from "framer-motion";
-import { MessageSquare, ShoppingBag, Code } from 'lucide-react';
+import { Bot, Zap, BarChart3, Code2, MessageSquare, Globe } from 'lucide-react';
 
 const features = [
   {
-    title: "Real-time AI Responses",
-    description: "Our AI answers product questions instantly, providing accurate information without human intervention.",
-    icon: MessageSquare,
+    title: "Custom AI Agents",
+    description: "Create unlimited AI chatbots trained on your content. Each agent learns from your URLs, product catalogs, and documentation to provide accurate answers.",
+    icon: Bot,
     color: "bg-blue-500/10 text-blue-500",
   },
   {
-    title: "Product Recommendations",
-    description: "Smart product suggestions based on customer inquiries and browsing behavior to increase conversions.",
-    icon: ShoppingBag,
+    title: "Smart Product Recommendations",
+    description: "AI automatically suggests relevant products based on customer questions, increasing cart value and conversion rates by understanding user intent.",
+    icon: MessageSquare,
     color: "bg-purple-500/10 text-purple-500",
   },
-  // {
-  //   title: "Automatic Escalation",
-  //   description: "Out-of-scope questions get automatically routed to your support team via email with context included.",
-  //   icon: MailPlus,
-  //   color: "bg-amber-500/10 text-amber-500",
-  // },
   {
-    title: "Simple Integration",
-    description: "Just one line of code to add Chatter AI to any website, with special plugins for Shopify and WordPress.",
-    icon: Code,
+    title: "Instant Integration",
+    description: "Add AI chat to your website in under 2 minutes with a single line of code. Works on Shopify, WordPress, custom sites, or any platform.",
+    icon: Code2,
     color: "bg-green-500/10 text-green-500",
   },
-  // {
-  //   title: "Analytics Dashboard",
-  //   description: "Track performance metrics, customer satisfaction, and gain insights from conversation history.",
-  //   icon: BarChart,
-  //   color: "bg-indigo-500/10 text-indigo-500",
-  // },
-  // {
-  //   title: "Enterprise Security",
-  //   description: "Bank-level encryption and data protection to keep your customer interactions safe and private.",
-  //   icon: Shield,
-  //   color: "bg-red-500/10 text-red-500",
-  // },
+  {
+    title: "Lightning Fast Responses",
+    description: "Powered by GPT-4, Claude, and Gemini models. Get instant, intelligent responses that sound natural and solve customer problems in real-time.",
+    icon: Zap,
+    color: "bg-yellow-500/10 text-yellow-500",
+  },
+  {
+    title: "Analytics Dashboard",
+    description: "Track conversations, monitor agent performance, and understand customer behavior. Get insights to improve your products and support.",
+    icon: BarChart3,
+    color: "bg-indigo-500/10 text-indigo-500",
+  },
+  {
+    title: "Multi-Language Support",
+    description: "Serve global customers with AI that understands and responds in multiple languages. Expand your market without hiring multilingual support staff.",
+    icon: Globe,
+    color: "bg-pink-500/10 text-pink-500",
+  },
 ];
 
 export default function FeaturesSection() {
@@ -47,8 +47,8 @@ export default function FeaturesSection() {
     <section id="features" className="py-24 bg-muted/30 relative">
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 radial-gradient opacity-20" />
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 radial-gradient opacity-20" />
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-radial from-primary/5 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-radial from-accent/5 to-transparent" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,13 +60,13 @@ export default function FeaturesSection() {
           className="text-center mb-16"
         >
           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full uppercase">
-            Key Features
+            Powerful Features
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Everything You Need for <span className="text-gradient">AI Customer Support</span>
+            Everything You Need to <span className="text-gradient">Automate Customer Support</span>
           </h2>
-          <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
-            Comprehensive tools to automate support, increase sales, and delight your customers.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Turn website visitors into customers with AI that works 24/7. No technical skills required.
           </p>
         </motion.div>
 
@@ -85,10 +85,37 @@ export default function FeaturesSection() {
                 <feature.icon className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-              <p className="text-foreground/80">{feature.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="text-center mt-16"
+        >
+          <p className="text-muted-foreground mb-4">
+            Join hundreds of businesses using AI to scale their customer support
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm">
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Free forever plan</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Setup in 2 minutes</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

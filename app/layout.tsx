@@ -2,6 +2,7 @@ import type React from "react"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { FloatingCommandInput } from "@/components/floating-command-input"
 import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
+          <FloatingCommandInput />
         </ThemeProvider>
         <Script src="http://localhost:3000/embed.js" data-slug="ayuugoyal"></Script>
       </body>

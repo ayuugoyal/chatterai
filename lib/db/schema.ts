@@ -93,7 +93,7 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 
 // Updated agents table
 export const agents = pgTable("agents", {
-  id: uuid("id").primaryKey().unique().defaultRandom().notNull(),
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -139,7 +139,7 @@ export const conversations = pgTable("conversations", {
 });
 
 export const shopifyConfigs = pgTable("shopify_configs", {
-  id: uuid("id").primaryKey().unique().defaultRandom().notNull(),
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
   agentId: uuid("agent_id")
     .notNull()
     .references(() => agents.id, { onDelete: "cascade" }),
@@ -156,7 +156,7 @@ export const shopifyConfigs = pgTable("shopify_configs", {
 });
 
 export const uiConfigs = pgTable("ui_configs", {
-  id: uuid("id").primaryKey().unique().defaultRandom().notNull(),
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
   agentId: uuid("agent_id")
     .notNull()
     .references(() => agents.id, { onDelete: "cascade" }),
@@ -191,6 +191,7 @@ export const uiConfigs = pgTable("ui_configs", {
   showTypingIndicator: boolean("show_typing_indicator").default(true).notNull(),
   allowAttachments: boolean("allow_attachments").default(false).notNull(),
   maxOutputTokens: integer("max_output_tokens").default(1000).notNull(),
+  uiStyle: varchar("ui_style", { length: 20 }).default("floating").notNull(), // floating or widget
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

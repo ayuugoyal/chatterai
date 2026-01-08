@@ -36,8 +36,12 @@ export function Header() {
       link: "#features",
     },
     {
-      name: "Demo",
-      link: "#demo",
+      name: "How it Works",
+      link: "#how-it-works",
+    },
+    {
+      name: "Pricing",
+      link: "#pricing",
     },
   ];
 

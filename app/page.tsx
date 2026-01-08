@@ -4,14 +4,10 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/home/Header';
-// import HeroSection from '@/components/home/HeroSection';
-// import TrustedBySection from '@/components/home/TrustedBySection';
+import HeroSection from '@/components/home/HeroSection';
 import HowItWorksSection from '@/components/home/HowItWorksSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
-import ChatDemoSection from '@/components/home/ChatDemoSection';
-// import PricingSection from '@/components/home/PricingSection';
-// import TestimonialsSection from '@/components/home/TestimonialsSection';
-import FaqSection from '@/components/home/FaqSection';
+import PricingSection from '@/components/home/PricingSection';
 import CtaSection from '@/components/home/CtaSection';
 import Footer from '@/components/home/Footer';
 import { ScrollProgress } from '@/components/magicui/scroll-progress';
@@ -51,14 +47,10 @@ export default function Home() {
       </div>
       <main>
         <ScrollProgress />
-        {/* <HeroSection /> */}
-        {/* <TrustedBySection /> */}
-        <HowItWorksSection />
+        <HeroSection />
         <FeaturesSection />
-        <ChatDemoSection />
-        {/* <PricingSection /> */}
-        {/* <TestimonialsSection /> */}
-        <FaqSection />
+        <HowItWorksSection />
+        <PricingSection />
         <CtaSection />
       </main>
       <Footer />

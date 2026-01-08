@@ -8,7 +8,9 @@
       "Bash(npx eslint:*)",
       "Bash(npx tsc:*)",
       "Bash(ls:*)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(git diff:*)",
+      "Bash(pkill:*)"
     ]
   }
 }
