@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bot, MessageSquare, Send, User, X } from "lucide-react"
+import { Bot, Send, User, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -12,13 +12,10 @@ type ChatWidgetPreviewProps = {
     secondaryColor: string
     backgroundColor: string
     textColor: string
-    buttonPosition: string
-    buttonSize: number
     widgetWidth: number
     widgetHeight: number
     borderRadius: number
     welcomeMessage: string
-    buttonIcon: string
     headerTitle: string
     showAgentAvatar: boolean
     showTimestamp: boolean
@@ -65,82 +62,68 @@ export default function ChatWidgetPreview({ config }: ChatWidgetPreviewProps) {
     }, 1500)
   }
 
-  const getButtonIcon = () => {
-    switch (config.buttonIcon) {
-      case "message":
-        return <MessageSquare size={24} />
-      case "chat":
-        return <MessageSquare size={24} />
-      case "help":
-        return <MessageSquare size={24} />
-      case "support":
-        return <MessageSquare size={24} />
-      default:
-        return <MessageSquare size={24} />
-    }
-  }
-
-  const getButtonPositionStyles = () => {
-    switch (config.buttonPosition) {
-      case "bottom-right":
-        return { bottom: "20px", right: "20px" }
-      case "bottom-left":
-        return { bottom: "20px", left: "20px" }
-      case "top-right":
-        return { top: "20px", right: "20px" }
-      case "top-left":
-        return { top: "20px", left: "20px" }
-      default:
-        return { bottom: "20px", right: "20px" }
-    }
-  }
-
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
   return (
-    <div className="relative border rounded-lg p-8 bg-gray-100 h-[600px] flex items-center justify-center">
-      {/* Chat Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
+    <div className="relative border rounded-lg p-8 bg-gray-100 h-[600px] flex items-center justify-center overflow-hidden">
+      {/* Dark Backdrop (when chat is open) */}
+      {isOpen && (
+        <div
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm z-10 transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Floating Input */}
+      <div
+        onClick={() => setIsOpen(true)}
         style={{
           position: "absolute",
-          ...getButtonPositionStyles(),
-          width: `${config.buttonSize}px`,
-          height: `${config.buttonSize}px`,
-          borderRadius: "50%",
-          backgroundColor: config.primaryColor,
-          color: "white",
-          border: "none",
+          bottom: "24px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 15,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          gap: "12px",
+          padding: "12px 24px",
+          backgroundColor: config.backgroundColor,
+          border: `1px solid ${config.primaryColor}30`,
+          borderRadius: "999px",
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)",
           cursor: "pointer",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-          zIndex: 1000,
+          maxWidth: "90%",
+          width: "400px",
         }}
       >
-        {getButtonIcon()}
-      </button>
+        <Search size={18} style={{ color: config.textColor, opacity: 0.6, flexShrink: 0 }} />
+        <span style={{ color: config.textColor, opacity: 0.65, fontSize: "15px" }}>
+          Ask {config.headerTitle} anything...
+        </span>
+      </div>
 
-      {/* Chat Widget */}
+      {/* Chat Modal Window */}
       {isOpen && (
         <div
           style={{
             position: "absolute",
-            ...getButtonPositionStyles(),
-            transform: "translate(0, -60px)",
-            width: `${config.widgetWidth}px`,
+            bottom: "90px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "90%",
+            maxWidth: `${config.widgetWidth}px`,
             height: `${config.widgetHeight}px`,
-            borderRadius: `${config.borderRadius}px`,
+            maxHeight: "70vh",
+            borderRadius: "20px",
             backgroundColor: config.backgroundColor,
             color: config.textColor,
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            zIndex: 999,
+            zIndex: 20,
           }}
         >
           {/* Header */}

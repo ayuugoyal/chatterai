@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
 import { AgentFormValues, createAgent } from '@/lib/actions/agent-actions'
+import { Plus, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -254,26 +256,73 @@ export function AgentPopUp() {
                     <FormField
                       control={form.control}
                       name="urls"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold">Knowledge Base</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="https://example.com/sitemap.xml&#10;https://example.com/docs"
-                              className="min-h-[120px] font-mono text-sm focus-visible:ring-2 focus-visible:ring-primary/50"
-                              {...field}
-                              value={field.value ? field.value.join('\n') : ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                const urls = val.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
-                                field.onChange(urls);
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>Add sitemap.xml or individual URLs (one per line) to train your agent.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const urls = field.value || [];
+
+                        const addUrl = () => {
+                          field.onChange([...urls, '']);
+                        };
+
+                        const removeUrl = (index: number) => {
+                          const newUrls = urls.filter((_, i) => i !== index);
+                          field.onChange(newUrls);
+                        };
+
+                        const updateUrl = (index: number, value: string) => {
+                          const newUrls = [...urls];
+                          newUrls[index] = value;
+                          field.onChange(newUrls);
+                        };
+
+                        return (
+                          <FormItem>
+                            <FormLabel className="text-base font-semibold">Knowledge Base</FormLabel>
+                            <div className="space-y-3">
+                              {urls.length === 0 ? (
+                                <div className="text-sm text-muted-foreground italic">
+                                  No URLs added yet. Click + to add URLs.
+                                </div>
+                              ) : (
+                                urls.map((url: string, index: number) => (
+                                  <div key={index} className="flex gap-2">
+                                    <FormControl>
+                                      <Input
+                                        placeholder="https://example.com/sitemap.xml"
+                                        className="font-mono text-sm focus-visible:ring-2 focus-visible:ring-primary/50"
+                                        value={url}
+                                        onChange={(e) => updateUrl(index, e.target.value)}
+                                      />
+                                    </FormControl>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => removeUrl(index)}
+                                      className="shrink-0"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ))
+                              )}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={addUrl}
+                                className="w-full"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add URL
+                              </Button>
+                            </div>
+                            <FormDescription>
+                              Add sitemap.xml or individual URLs to train your agent.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
                   </div>
                 </div>

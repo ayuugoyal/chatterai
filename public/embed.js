@@ -222,6 +222,13 @@
         @media (max-width: 768px) {
           .chatter-ai-floating-input {
             max-width: calc(100% - 32px);
+            width: calc(100% - 32px);
+            padding: 10px 20px;
+            bottom: 20px;
+          }
+
+          .chatter-ai-floating-input input {
+            font-size: 14px;
           }
 
           .chatter-ai-chat-window {
@@ -233,6 +240,18 @@
         }
 
         @media (max-width: 480px) {
+          .chatter-ai-floating-input {
+            max-width: calc(100% - 24px);
+            width: calc(100% - 24px);
+            padding: 10px 16px;
+            bottom: 12px;
+            gap: 10px;
+          }
+
+          .chatter-ai-floating-input input {
+            font-size: 14px;
+          }
+
           .chatter-ai-chat-window {
             width: 100%;
             height: 100%;
@@ -241,10 +260,6 @@
             left: 0;
             transform: none;
             border-radius: 0;
-          }
-
-          .chatter-ai-floating-input {
-            bottom: 16px;
           }
         }
       `;

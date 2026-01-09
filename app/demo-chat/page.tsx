@@ -7,22 +7,53 @@ import { Send, Bot, User, Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useChat } from "@ai-sdk/react";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
+  timestamp?: Date;
 }
 
 export default function DemoChatPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [sessionId, setSessionId] = useState<string>("");
+
+  // Generate or retrieve session ID from localStorage
+  useEffect(() => {
+    const STORAGE_KEY = "demo_chat_session_id";
+    let storedSessionId = localStorage.getItem(STORAGE_KEY);
+
+    if (!storedSessionId) {
+      // Generate new session ID
+      storedSessionId = `demo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      localStorage.setItem(STORAGE_KEY, storedSessionId);
+    }
+
+    setSessionId(storedSessionId);
+  }, []);
+
+  // Use AI SDK for chat functionality
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = useChat({
+    api: "/api/demo-chat",
+    body: {
+      sessionId,
+    },
+    initialMessages: [
+      {
+        id: "welcome",
+        role: "assistant",
+        content: "Hi! I'm the Chatter AI assistant. I can help you learn about our AI chatbot platform, answer questions about features, pricing, or how to get started. What would you like to know?",
+      },
+    ],
+    onError: (error) => {
+      console.error("Chat error:", error);
+    },
+  });
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -33,22 +64,23 @@ export default function DemoChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Add initial welcome message
+  // If there's an initial query, send it automatically
   useEffect(() => {
-    const welcomeMessage: Message = {
-      id: "welcome",
-      role: "assistant",
-      content: `Hi! I'm the Chatter AI assistant. I can help you learn about our AI chatbot platform, answer questions about features, pricing, or how to get started. What would you like to know?`,
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
-
-    // If there's an initial query, send it automatically
     if (initialQuery) {
       setTimeout(() => {
-        handleSendMessage(initialQuery);
+        // Check if it's a greeting
+        const isGreeting = isSimpleGreeting(initialQuery);
+        if (isGreeting) {
+          handleGreeting(initialQuery);
+        } else {
+          append({
+            role: "user",
+            content: initialQuery,
+          });
+        }
       }, 500);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   // Focus input on mount
@@ -56,73 +88,61 @@ export default function DemoChatPage() {
     inputRef.current?.focus();
   }, []);
 
-  const handleSendMessage = async (messageText?: string) => {
-    const text = messageText || input.trim();
-    if (!text) return;
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    // Simulate AI response (you can replace this with actual API call)
-    setTimeout(() => {
-      const response = generateResponse(text);
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: response,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000 + Math.random() * 1000);
+  // Check if message is a simple greeting
+  const isSimpleGreeting = (text: string): boolean => {
+    const lowerText = text.toLowerCase().trim();
+    const greetings = [
+      "hi", "hello", "hey", "hola", "greetings", "good morning",
+      "good afternoon", "good evening", "what's up", "whats up",
+      "yo", "sup", "howdy"
+    ];
+    return greetings.some(greeting => lowerText === greeting || lowerText.startsWith(greeting + " "));
   };
 
-  // Simple response generator (replace with actual AI API)
-  const generateResponse = (query: string): string => {
-    const lowerQuery = query.toLowerCase();
+  // Handle greeting with predefined response
+  const handleGreeting = (text: string) => {
+    const greetingResponses = [
+      "Hello! 👋 I'm here to help you learn about Chatter AI. What would you like to know?",
+      "Hi there! 😊 I can answer any questions about our AI chatbot platform. How can I help?",
+      "Hey! Great to see you! Ask me anything about Chatter AI's features, pricing, or how to get started.",
+    ];
+    const randomResponse = greetingResponses[Math.floor(Math.random() * greetingResponses.length)];
 
-    if (lowerQuery.includes("price") || lowerQuery.includes("cost") || lowerQuery.includes("plan")) {
-      return "Chatter AI offers three plans:\n\n**Free Plan** - ₹0/month\n• 5 AI Agents\n• 250 conversations/month\n• 5 URLs per agent\n• Perfect for testing!\n\n**Pro Plan** - ₹500/month\n• 30 AI Agents\n• 30,000 conversations/month\n• 50 URLs per agent\n• Priority support\n\n**Enterprise** - ₹2,000/month\n• Unlimited agents & conversations\n• Dedicated account manager\n• Custom integrations\n\nWant to get started with the free plan?";
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        role: "user",
+        content: text,
+      },
+      {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: randomResponse,
+      },
+    ]);
+  };
+
+  // Custom submit handler to check for greetings
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedInput = input.trim();
+    if (!trimmedInput) return;
+
+    // Check if it's a simple greeting
+    if (isSimpleGreeting(trimmedInput)) {
+      handleGreeting(trimmedInput);
+      handleInputChange({ target: { value: "" } } as any);
+    } else {
+      // Use AI for non-greeting messages
+      handleSubmit(e);
     }
-
-    if (lowerQuery.includes("how") && (lowerQuery.includes("work") || lowerQuery.includes("use"))) {
-      return "Getting started with Chatter AI is super simple:\n\n1. **Sign up** for free (no credit card needed)\n2. **Create an AI agent** and provide URLs to your website, docs, or product pages\n3. **Copy the embed code** - just one line!\n4. **Paste it** on your website before the </body> tag\n\nYour AI chatbot will instantly start answering customer questions based on your content. It works on any website - Shopify, WordPress, custom sites, anywhere!";
-    }
-
-    if (lowerQuery.includes("feature") || lowerQuery.includes("can it") || lowerQuery.includes("does it")) {
-      return "Chatter AI comes packed with features:\n\n✨ **Custom AI Agents** - Train on your content\n🎯 **Smart Recommendations** - Suggest products automatically\n⚡ **Instant Integration** - One line of code\n🤖 **Multiple AI Models** - GPT-4, Claude, Gemini\n📊 **Analytics Dashboard** - Track performance\n🌍 **Multi-language** - Serve global customers\n🎨 **Customizable** - Match your brand\n\nWhich feature interests you most?";
-    }
-
-    if (lowerQuery.includes("integrate") || lowerQuery.includes("install") || lowerQuery.includes("add")) {
-      return "Integration is incredibly easy! Here's all you need:\n\n```html\n<script src=\"https://yoursite.com/embed.js\" data-slug=\"your-agent-slug\"></script>\n```\n\nJust add this before your `</body>` tag. That's it!\n\nWe also have plugins for:\n• Shopify\n• WordPress\n• Wix\n• Squarespace\n\nNo coding knowledge required!";
-    }
-
-    if (lowerQuery.includes("support") || lowerQuery.includes("help") || lowerQuery.includes("contact")) {
-      return "We're here to help!\n\n📧 **Email**: support@chatterai.com\n💬 **Live Chat**: Available on our dashboard\n📚 **Documentation**: Comprehensive guides and tutorials\n\n**Free plan**: Email support (24-48hrs)\n**Pro plan**: Priority support (12hrs)\n**Enterprise**: 24/7 support + dedicated account manager\n\nNeed immediate help? Feel free to ask me anything!";
-    }
-
-    if (lowerQuery.includes("start") || lowerQuery.includes("begin") || lowerQuery.includes("signup")) {
-      return "Awesome! Here's how to get started:\n\n1. Click 'Sign Up' in the top right\n2. Create your free account (no credit card)\n3. You'll get instant access to:\n   • 5 AI agents\n   • 250 free conversations/month\n   • Full dashboard access\n\nThe whole setup takes less than 2 minutes! Ready to transform your customer support with AI?";
-    }
-
-    // Default response
-    return `That's a great question! Chatter AI helps businesses automate customer support using AI chatbots that can:\n\n• Answer questions 24/7\n• Recommend products\n• Handle multiple conversations\n• Work in any language\n• Integrate in 2 minutes\n\nCould you tell me more about what you're looking for? I'd love to help you find the perfect solution!`;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleFormSubmit(e as any);
     }
   };
 
@@ -204,12 +224,6 @@ export default function DemoChatPage() {
                       {message.content}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 px-1">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
                 </div>
               </motion.div>
             ))}
@@ -242,17 +256,14 @@ export default function DemoChatPage() {
       <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 max-w-4xl">
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
+            onSubmit={handleFormSubmit}
             className="flex items-end gap-2"
           >
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyPress}
                 placeholder="Ask me anything about Chatter AI..."
                 rows={1}

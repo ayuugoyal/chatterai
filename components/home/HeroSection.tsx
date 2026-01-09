@@ -33,7 +33,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5 }}
             className="text-center"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-medium text-primary bg-primary/10 rounded-full border border-primary/20">
+            <span className="inline-flex items-center gap-2 px-2 py-1 mb-8 text-[12px] font-medium text-primary bg-primary/10 rounded-full border border-primary/20">
               <Zap className="w-4 h-4" />
               AI-Powered Customer Support Platform
             </span>
@@ -41,7 +41,7 @@ export default function HeroSection() {
 
           {/* Main Headline */}
           <motion.h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-center"
+            className="text-2xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -53,7 +53,7 @@ export default function HeroSection() {
 
           {/* Subheadline */}
           <motion.p
-            className="text-lg md:text-xl mb-8 text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed"
+            className="text-sm md:text-xl mb-8 text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -64,19 +64,19 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            className="flex items-center sm:flex-row gap-4 justify-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
-              <Button size="lg" className="gap-2 text-base">
+              <Button size="sm" className="gap-2 text-xs sm:text-base">
                 {isSignedIn ? "Go to Dashboard" : "Start Free Trial"}
                 <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link href="#demo">
-              <Button size="lg" variant="outline" className="text-base">
+              <Button size="sm" variant="outline" className="text-xs sm:text-base">
                 See Live Demo
               </Button>
             </Link>
@@ -84,7 +84,7 @@ export default function HeroSection() {
 
           {/* Trust Indicators */}
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground mb-16"
+            className="flex flex-wrap items-center justify-center gap-8 text-xs sm:text-sm text-muted-foreground mb-16"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}

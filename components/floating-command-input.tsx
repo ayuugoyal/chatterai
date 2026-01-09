@@ -101,23 +101,21 @@ export function FloatingCommandInput() {
   return (
     <>
       {/* Floating Input Button - Always visible */}
-      <motion.button
+      <button
         onClick={() => {
           setIsOpen(true);
           setTimeout(() => inputRef.current?.focus(), 100);
         }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-6 py-3 bg-background/80 backdrop-blur-lg border border-border rounded-full shadow-lg hover:shadow-xl transition-all"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 sm:px-6 py-3 bg-background/90 backdrop-blur-lg border border-border rounded-full shadow-lg hover:shadow-xl transition-shadow w-[calc(100vw-2rem)] max-w-md sm:max-w-2xl cursor-pointer"
       >
-        <Search className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground hidden sm:inline">
+        <Search className="w-[18px] h-[18px] text-muted-foreground flex-shrink-0" />
+        <span className="text-[15px] text-muted-foreground flex-1 text-left">
           Try AI Chat or type a command...
         </span>
         <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted rounded">
           <Command className="w-3 h-3" />K
         </kbd>
-      </motion.button>
+      </button>
 
       {/* Expanded Command Palette */}
       <AnimatePresence>
@@ -140,13 +138,13 @@ export function FloatingCommandInput() {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4"
+              className="fixed top-[10%] sm:top-[20%] left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-2xl z-50"
             >
-              <div className="bg-background rounded-2xl border border-border shadow-2xl overflow-hidden">
+              <div className="bg-background rounded-xl sm:rounded-2xl border border-border shadow-2xl overflow-hidden max-h-[80vh] overflow-y-auto">
                 {/* Header with Search */}
                 <form onSubmit={handleSubmit} className="relative">
-                  <div className="flex items-center gap-3 px-6 py-4 border-b border-border">
-                    <Search className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
+                    <Search className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
                     <input
                       ref={inputRef}
                       type="text"
@@ -155,7 +153,7 @@ export function FloatingCommandInput() {
                       onFocus={() => setIsFocused(true)}
                       onBlur={() => setIsFocused(false)}
                       placeholder="Type agent slug, /chat for demo, or ask a question..."
-                      className="flex-1 bg-transparent outline-none text-base placeholder:text-muted-foreground"
+                      className="flex-1 bg-transparent outline-none text-sm sm:text-base placeholder:text-muted-foreground"
                       autoFocus
                     />
                     <button
@@ -246,17 +244,17 @@ export function FloatingCommandInput() {
 
                 {/* Footer */}
                 <div className="px-4 py-3 bg-muted/50 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <span className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-background rounded">↵</kbd>
-                      to chat
+                      <kbd className="px-1.5 py-0.5 bg-background rounded text-[10px] sm:text-xs">↵</kbd>
+                      <span className="hidden sm:inline">to chat</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-background rounded">ESC</kbd>
-                      to close
+                      <kbd className="px-1.5 py-0.5 bg-background rounded text-[10px] sm:text-xs">ESC</kbd>
+                      <span className="hidden sm:inline">to close</span>
                     </span>
                   </div>
-                  <span>Powered by Chatter AI</span>
+                  <span className="hidden sm:inline">Powered by Chatter AI</span>
                 </div>
               </div>
             </motion.div>

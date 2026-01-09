@@ -289,6 +289,37 @@ export const uiConfigsRelations = relations(uiConfigs, ({ one }) => ({
   }),
 }));
 
+// Demo Chat Sessions (for storing demo chat conversations with session IDs)
+export const demoChatSessions = pgTable("demo_chat_sessions", {
+  id: varchar("id", { length: 191 }).primaryKey().notNull(),
+  sessionId: varchar("session_id", { length: 191 }).notNull().unique(),
+  messageCount: integer("message_count").default(0).notNull(),
+  lastSummary: text("last_summary"), // AI-generated summary of the conversation
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Demo Chat Messages (stores all messages from demo chat)
+export const demoChatMessages = pgTable("demo_chat_messages", {
+  id: varchar("id", { length: 191 }).primaryKey().notNull(),
+  sessionId: varchar("session_id", { length: 191 }).notNull(),
+  role: varchar("role", { length: 20 }).notNull(), // 'user' or 'assistant'
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Demo Chat Relations
+export const demoChatSessionsRelations = relations(demoChatSessions, ({ many }) => ({
+  messages: many(demoChatMessages),
+}));
+
+export const demoChatMessagesRelations = relations(demoChatMessages, ({ one }) => ({
+  session: one(demoChatSessions, {
+    fields: [demoChatMessages.sessionId],
+    references: [demoChatSessions.sessionId],
+  }),
+}));
+
 // Types
 export type UserTable = InferModel<typeof users>;
 export type SessionTable = InferModel<typeof sessions>;
@@ -298,3 +329,5 @@ export type AgentTable = InferModel<typeof agents>;
 export type AgentUrlTable = InferModel<typeof agentUrls>;
 export type ConversationTable = InferModel<typeof conversations>;
 export type MessageTable = InferModel<typeof messages>;
+export type DemoChatSessionTable = InferModel<typeof demoChatSessions>;
+export type DemoChatMessageTable = InferModel<typeof demoChatMessages>;

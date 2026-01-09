@@ -31,15 +31,12 @@ const uiFormSchema = z.object({
   }),
 
   // Layout
-  buttonPosition: z.string(),
-  buttonSize: z.coerce.number().min(40).max(80),
   widgetWidth: z.coerce.number().min(300).max(500),
   widgetHeight: z.coerce.number().min(400).max(700),
   borderRadius: z.coerce.number().min(0).max(20),
 
   // Content
   welcomeMessage: z.string().min(1, { message: "Welcome message is required" }),
-  buttonIcon: z.string().min(1, { message: "Button icon is required" }),
   headerTitle: z.string().min(1, { message: "Header title is required" }),
 
   // Features
@@ -59,13 +56,10 @@ const defaultValues: UIFormValues = {
   secondaryColor: "#f5f5f5",
   backgroundColor: "#ffffff",
   textColor: "#333333",
-  buttonPosition: "bottom-right",
-  buttonSize: 60,
   widgetWidth: 380,
   widgetHeight: 600,
   borderRadius: 8,
   welcomeMessage: "Hello! How can I help you today?",
-  buttonIcon: "message",
   headerTitle: "Chat Support",
   showAgentAvatar: true,
   showTimestamp: true,
@@ -102,13 +96,10 @@ export default function UICustomization({
         secondaryColor: existingConfig.secondaryColor || defaultValues.secondaryColor,
         backgroundColor: existingConfig.backgroundColor || defaultValues.backgroundColor,
         textColor: existingConfig.textColor || defaultValues.textColor,
-        buttonPosition: existingConfig.buttonPosition || defaultValues.buttonPosition,
-        buttonSize: existingConfig.buttonSize || defaultValues.buttonSize,
         widgetWidth: existingConfig.widgetWidth || defaultValues.widgetWidth,
         widgetHeight: existingConfig.widgetHeight || defaultValues.widgetHeight,
         borderRadius: existingConfig.borderRadius || defaultValues.borderRadius,
         welcomeMessage: existingConfig.welcomeMessage || defaultValues.welcomeMessage,
-        buttonIcon: existingConfig.buttonIcon || defaultValues.buttonIcon,
         headerTitle: existingConfig.headerTitle || defaultValues.headerTitle,
         showAgentAvatar: existingConfig.showAgentAvatar ?? defaultValues.showAgentAvatar,
         showTimestamp: existingConfig.showTimestamp ?? defaultValues.showTimestamp,
@@ -327,63 +318,10 @@ export default function UICustomization({
               <TabsContent value="layout" className="space-y-4 pt-4">
                 <FormField
                   control={form.control}
-                  name="buttonPosition"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Button Position</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          updatePreview({ buttonPosition: value as string })
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select position" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                          <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                          <SelectItem value="top-right">Top Right</SelectItem>
-                          <SelectItem value="top-left">Top Left</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="buttonSize"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Button Size: {field.value}px</FormLabel>
-                      <FormControl>
-                        <Slider
-                          min={40}
-                          max={80}
-                          step={1}
-                          defaultValue={[field.value]}
-                          onValueChange={(values) => {
-                            field.onChange(values[0])
-                            updatePreview({ buttonSize: values[0] })
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="widgetWidth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Widget Width: {field.value}px</FormLabel>
+                      <FormLabel>Chat Window Width: {field.value}px</FormLabel>
                       <FormControl>
                         <Slider
                           min={300}
@@ -396,6 +334,7 @@ export default function UICustomization({
                           }}
                         />
                       </FormControl>
+                      <FormDescription>Maximum width of the chat modal window</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -406,7 +345,7 @@ export default function UICustomization({
                   name="widgetHeight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Widget Height: {field.value}px</FormLabel>
+                      <FormLabel>Chat Window Height: {field.value}px</FormLabel>
                       <FormControl>
                         <Slider
                           min={400}
@@ -419,6 +358,7 @@ export default function UICustomization({
                           }}
                         />
                       </FormControl>
+                      <FormDescription>Height of the chat modal window</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -465,36 +405,6 @@ export default function UICustomization({
                         />
                       </FormControl>
                       <FormDescription>First message shown when a user opens the chat</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="buttonIcon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Button Icon</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          updatePreview({ buttonIcon: value as string })
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select icon" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="message">Message</SelectItem>
-                          <SelectItem value="chat">Chat</SelectItem>
-                          <SelectItem value="help">Help</SelectItem>
-                          <SelectItem value="support">Support</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
