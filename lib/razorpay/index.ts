@@ -2,11 +2,22 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// Initialize Razorpay instance
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+// Lazy initialization of Razorpay instance
+let razorpayInstance: Razorpay | null = null;
+
+function getRazorpayInstance() {
+  if (!razorpayInstance) {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.warn("Razorpay credentials not configured. Payment features will be disabled.");
+      return null;
+    }
+    razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
+  }
+  return razorpayInstance;
+}
 
 /**
  * Create a Razorpay subscription
@@ -21,6 +32,11 @@ export async function createRazorpaySubscription(
   totalCount: number = 0
 ) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
       customer_id: customerId,
@@ -47,6 +63,11 @@ export async function createRazorpaySubscription(
  */
 export async function createRazorpayCustomer(email: string, name: string) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const customer = await razorpay.customers.create({
       email,
       name,
@@ -75,6 +96,11 @@ export async function createRazorpayOrder(
   receipt?: string
 ) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const order = await razorpay.orders.create({
       amount,
       currency,
@@ -102,6 +128,11 @@ export async function cancelRazorpaySubscription(
   cancelAtCycleEnd: boolean = true
 ) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const subscription = await razorpay.subscriptions.cancel(subscriptionId, {
       cancel_at_cycle_end: cancelAtCycleEnd ? 1 : 0,
     });
@@ -166,6 +197,11 @@ export function verifyRazorpayPayment(
  */
 export async function fetchRazorpaySubscription(subscriptionId: string) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const subscription = await razorpay.subscriptions.fetch(subscriptionId);
     return { success: true, subscription };
   } catch (error) {
@@ -181,6 +217,11 @@ export async function fetchRazorpaySubscription(subscriptionId: string) {
  */
 export async function fetchRazorpayPayment(paymentId: string) {
   try {
+    const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return { success: false, error: "Razorpay not configured" };
+    }
+
     const payment = await razorpay.payments.fetch(paymentId);
     return { success: true, payment };
   } catch (error) {

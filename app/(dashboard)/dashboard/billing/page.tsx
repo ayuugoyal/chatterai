@@ -33,7 +33,7 @@ export default async function BillingPage() {
                 <p className="text-sm text-muted-foreground">
                   {subscription.plan.price === 0
                     ? "Free plan"
-                    : `$${(subscription.plan.price / 100).toFixed(2)}/month`}
+                    : `₹${(subscription.plan.price / 100).toFixed(0)}/month`}
                 </p>
               </div>
               <Badge variant={subscription.status === "active" ? "default" : "destructive"}>
@@ -118,7 +118,7 @@ export default async function BillingPage() {
                     <span className="text-3xl font-bold">Free</span>
                   ) : (
                     <div>
-                      <span className="text-3xl font-bold">${(plan.price / 100).toFixed(0)}</span>
+                      <span className="text-3xl font-bold">₹{(plan.price / 100).toFixed(0)}</span>
                       <span className="text-muted-foreground">/month</span>
                     </div>
                   )}

@@ -2,7 +2,7 @@ import type React from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import Link from "next/link";
-import { Bot, LayoutDashboard, CreditCard, LogOut } from "lucide-react";
+import { Bot, LayoutDashboard, CreditCard, LogOut, Crown } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +18,9 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { signOut } from "@/lib/actions/auth-actions";
+import { getUserSubscription } from "@/lib/actions/subscription-actions";
 
 export default async function DashboardLayout({
   children,
@@ -31,6 +33,8 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
+  const subscription = await getUserSubscription();
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen flex-col w-full">
@@ -40,6 +44,16 @@ export default async function DashboardLayout({
               <SidebarTrigger className="md:hidden" />
             </div>
             <div className="flex items-center gap-4">
+              {subscription && subscription.plan.name !== "Free" && (
+                <Badge variant="secondary" className={`${
+                  subscription.plan.name === "Pro"
+                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                }`}>
+                  <Crown className="h-3 w-3 mr-1" />
+                  {subscription.plan.name}
+                </Badge>
+              )}
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.image || undefined} alt={user.name || ""} />
                 <AvatarFallback>
