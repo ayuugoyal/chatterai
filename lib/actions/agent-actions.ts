@@ -246,7 +246,6 @@ export async function createAgent(formData: AgentFormValues) {
     // Add URLs and scrape them
     if (urls && urls.length > 0) {
       console.log("SERVER ACTION: Processing URLs...", urls.length);
-      let urlsToProcess = [...urls];
 
       // Use a set to avoid duplicates from expansion
       const uniqueUrls = new Set<string>();
@@ -255,7 +254,7 @@ export async function createAgent(formData: AgentFormValues) {
         uniqueUrls.add(url);
       }
 
-      for (const url of uniqueUrls) {
+      for (const url of Array.from(uniqueUrls)) {
         console.log("SERVER ACTION: Inserting URL", url);
         const [agentUrl] = await db
           .insert(agentUrls)
@@ -353,11 +352,6 @@ async function scrapeUrlForAgent(agentUrlId: string, url: string) {
     // Normal scraping if not a sitemap or sitemap yielded no URLs
     const scrapedData = await scrapeWithCache(url);
     const formattedContent = formatScrapedDataForAI(scrapedData);
-
-    // Get agent ID for this URL
-    const agentUrlRecord = await db.query.agentUrls.findFirst({
-      where: eq(agentUrls.id, agentUrlId),
-    });
 
     await db
       .update(agentUrls)
@@ -502,7 +496,6 @@ export async function updateAgent(id: string, formData: AgentFormValues) {
         await db.delete(agentUrls).where(
           and(
             eq(agentUrls.agentId, id),
-            // @ts-ignore
             sql`url = ANY(${removedUrls})`
           )
         );

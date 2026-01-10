@@ -128,7 +128,7 @@ export function FloatingChatUI({
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as any);
+      handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
     }
   };
 
@@ -171,7 +171,7 @@ export function FloatingChatUI({
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <AnimatePresence initial={false}>
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 10 }}

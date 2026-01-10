@@ -8,7 +8,6 @@ import { Search, Command, Sparkles, ArrowRight, X } from "lucide-react";
 export function FloatingCommandInput() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -150,8 +149,6 @@ export function FloatingCommandInput() {
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      onFocus={() => setIsFocused(true)}
-                      onBlur={() => setIsFocused(false)}
                       placeholder="Type agent slug, /chat for demo, or ask a question..."
                       className="flex-1 bg-transparent outline-none text-sm sm:text-base placeholder:text-muted-foreground"
                       autoFocus
@@ -210,7 +207,7 @@ export function FloatingCommandInput() {
                         </div>
                         <div className="flex-1 text-left">
                           <div className="text-sm font-medium">
-                            Open agent: "{input}"
+                            Open agent: &quot;{input}&quot;
                           </div>
                           <div className="text-xs text-muted-foreground">
                             Visit /chat/{input}
@@ -232,7 +229,7 @@ export function FloatingCommandInput() {
                       </div>
                       <div className="flex-1 text-left">
                         <div className="text-sm font-medium">
-                          Ask in demo chat: "{input}"
+                          Ask in demo chat: &quot;{input}&quot;
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Chat with our AI assistant

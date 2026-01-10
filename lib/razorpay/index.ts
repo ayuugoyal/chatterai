@@ -46,7 +46,8 @@ export async function createRazorpaySubscription(
       notes: {
         created_via: "Chatter AI Platform",
       },
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     return { success: true, subscription };
   } catch (error) {
@@ -135,7 +136,8 @@ export async function cancelRazorpaySubscription(
 
     const subscription = await razorpay.subscriptions.cancel(subscriptionId, {
       cancel_at_cycle_end: cancelAtCycleEnd ? 1 : 0,
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     return { success: true, subscription };
   } catch (error) {

@@ -32,7 +32,7 @@ const formSchema = z.object({
   }),
   modelProvider: z.enum(["gemini", "anthropic", "openai"]),
   urls: z.array(z.string().url("Invalid URL")).optional(),
-  saveConversations: z.boolean().default(true),
+  saveConversations: z.boolean(),
   // Custom API keys (optional)
   geminiApiKey: z.string().optional(),
   anthropicApiKey: z.string().optional(),
@@ -172,7 +172,7 @@ export function AgentPopUp() {
                             />
                           </FormControl>
                           <FormDescription>
-                            Unique identifier for your agent's URL. Auto-generated but editable.
+                            Unique identifier for your agent&apos;s URL. Auto-generated but editable.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

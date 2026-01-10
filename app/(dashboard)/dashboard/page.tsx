@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card"
-import { Bot, ExternalLink, Link as LinkIcon, Crown, MessageSquare, TrendingUp, ArrowUpRight } from "lucide-react"
+import { Bot, ExternalLink, Link as LinkIcon, Crown, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { getUserAgents } from "@/lib/actions/agent-actions"
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             {subscription.plan.name === "Free" && usage.agentsUsed >= subscription.plan.maxAgents && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md border border-yellow-200 dark:border-yellow-800">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  ⚠️ You've reached your agent limit. <Link href="/dashboard/billing" className="underline font-medium">Upgrade to Pro</Link> to create up to 30 agents!
+                  ⚠️ You&apos;ve reached your agent limit. <Link href="/dashboard/billing" className="underline font-medium">Upgrade to Pro</Link> to create up to 30 agents!
                 </p>
               </div>
             )}
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
             {subscription.plan.maxConversations !== -1 && usage.conversationsUsed >= subscription.plan.maxConversations * 0.8 && (
               <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-md border border-orange-200 dark:border-orange-800">
                 <p className="text-sm text-orange-800 dark:text-orange-200">
-                  ⚡ You've used {Math.round((usage.conversationsUsed / subscription.plan.maxConversations) * 100)}% of your conversation limit this month.
+                  ⚡ You&apos;ve used {Math.round((usage.conversationsUsed / subscription.plan.maxConversations) * 100)}% of your conversation limit this month.
                   {subscription.plan.name === "Free" && (
                     <> <Link href="/dashboard/billing" className="underline font-medium">Upgrade now</Link> for more conversations!</>
                   )}
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Welcome to Chatter AI! 🎉</CardTitle>
             <CardDescription>
-              You're on the Free plan with 5 agents and 250 conversations per month. Create your first AI agent to get started!
+              You&apos;re on the Free plan with 5 agents and 250 conversations per month. Create your first AI agent to get started!
             </CardDescription>
           </CardHeader>
         </Card>

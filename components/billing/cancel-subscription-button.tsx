@@ -56,7 +56,7 @@ export function CancelSubscriptionButton() {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            Your subscription will remain active until the end of your current billing period. After that, you'll be
+            Your subscription will remain active until the end of your current billing period. After that, you&apos;ll be
             downgraded to the Free plan.
           </AlertDialogDescription>
         </AlertDialogHeader>

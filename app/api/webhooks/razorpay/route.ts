@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { subscriptions, subscriptionPlans } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { verifyRazorpayWebhook } from "@/lib/razorpay";
+
+interface RazorpayPayment {
+  id: string;
+  customer_id?: string;
+}
+
+interface RazorpaySubscription {
+  id: string;
+  current_start: number;
+  current_end: number;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,7 +75,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handlePaymentCaptured(payment: any) {
+async function handlePaymentCaptured(payment: RazorpayPayment) {
   console.log("Payment captured:", payment.id);
 
   try {
@@ -90,7 +101,7 @@ async function handlePaymentCaptured(payment: any) {
   }
 }
 
-async function handlePaymentFailed(payment: any) {
+async function handlePaymentFailed(payment: RazorpayPayment) {
   console.log("Payment failed:", payment.id);
 
   try {
@@ -116,7 +127,7 @@ async function handlePaymentFailed(payment: any) {
   }
 }
 
-async function handleSubscriptionActivated(razorpaySubscription: any) {
+async function handleSubscriptionActivated(razorpaySubscription: RazorpaySubscription) {
   console.log("Subscription activated:", razorpaySubscription.id);
 
   try {
@@ -143,7 +154,7 @@ async function handleSubscriptionActivated(razorpaySubscription: any) {
   }
 }
 
-async function handleSubscriptionCancelled(razorpaySubscription: any) {
+async function handleSubscriptionCancelled(razorpaySubscription: RazorpaySubscription) {
   console.log("Subscription cancelled:", razorpaySubscription.id);
 
   try {
@@ -187,10 +198,15 @@ async function handleSubscriptionCancelled(razorpaySubscription: any) {
   }
 }
 
-async function handleSubscriptionCharged(payment: any) {
+async function handleSubscriptionCharged(payment: RazorpayPayment) {
   console.log("Subscription charged:", payment.id);
 
   try {
+    if (!payment.customer_id) {
+      console.error("No customer_id in payment object");
+      return;
+    }
+
     // Find subscription by customer ID
     const subscription = await db.query.subscriptions.findFirst({
       where: eq(subscriptions.razorpayCustomerId, payment.customer_id),

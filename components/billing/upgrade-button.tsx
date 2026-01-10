@@ -7,9 +7,43 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  error?: {
+    description: string;
+  };
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+  };
+  theme: {
+    color: string;
+  };
+  modal?: {
+    ondismiss: () => void;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  on: (event: string, callback: (response: RazorpayResponse) => void) => void;
+}
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -72,7 +106,7 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
       name: "Chatter AI",
       description: `Upgrade to ${result.planName} Plan`,
       order_id: result.orderId,
-      handler: async function (response: any) {
+      handler: async function (response: RazorpayResponse) {
         try {
           // Verify payment and activate subscription
           const verifyResult = await verifyPaymentAndActivateSubscription(
@@ -96,7 +130,7 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
             });
             router.refresh();
           }
-        } catch (error) {
+        } catch {
           toast({
             title: "Error",
             description: "Failed to verify payment. Please contact support.",
@@ -123,10 +157,10 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
     const razorpay = new window.Razorpay(options);
     razorpay.open();
 
-    razorpay.on("payment.failed", function (response: any) {
+    razorpay.on("payment.failed", function (response: RazorpayResponse) {
       toast({
         title: "Payment Failed",
-        description: response.error.description || "Payment could not be processed",
+        description: response.error?.description || "Payment could not be processed",
         variant: "destructive",
       });
       setIsLoading(false);

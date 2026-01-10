@@ -32,7 +32,7 @@ const configSchema = z.object({
   anthropicApiKey: z.string().optional(),
   openaiApiKey: z.string().optional(),
   urls: z.array(z.string().url("Invalid URL")).optional(),
-  saveConversations: z.boolean().default(true),
+  saveConversations: z.boolean(),
 })
 
 type UIConfig = {
@@ -54,6 +54,7 @@ type UIConfig = {
   showTimestamp: boolean;
   showTypingIndicator: boolean;
   allowAttachments: boolean;
+  maxOutputTokens: number;
   createdAt: string;
   updatedAt: string;
 } | null;
@@ -64,9 +65,9 @@ const AgentTabs = (agentData: AgentTable) => {
   const testUrl = `${baseUrl}/chat/${agentData.slug}`
   const embedCode = `<script src="${baseUrl}/embed.js" data-slug="${agentData.slug}"></script>`
 
-  const [conversations, setConversations] = useState<unknown[]>([]);
+  const [conversations, setConversations] = useState<Array<{ id: string; sessionId: string; agentId: string; messageCount: number; createdAt: Date; updatedAt: Date }>>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<unknown[]>([]);
+  const [messages, setMessages] = useState<Array<{ id: string; conversationId: string; role: string; content: string; createdAt: Date }>>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +79,7 @@ const AgentTabs = (agentData: AgentTable) => {
       name: agentData.name || "",
       slug: agentData.slug || "",
       systemPrompt: agentData.systemPrompt || "",
-      modelProvider: agentData.modelProvider || "gemini",
+      modelProvider: (agentData.modelProvider || "gemini") as "gemini" | "anthropic" | "openai",
       geminiApiKey: agentData.geminiApiKey || "",
       anthropicApiKey: agentData.anthropicApiKey || "",
       openaiApiKey: agentData.openaiApiKey || "",
@@ -361,7 +362,7 @@ const AgentTabs = (agentData: AgentTable) => {
             <UICustomization
               key={uiConfig?.id || 'loading'}
               agentId={agentData.id}
-              existingConfig={uiConfig}
+              existingConfig={uiConfig || undefined}
             />
           </CardContent>
         </Card>

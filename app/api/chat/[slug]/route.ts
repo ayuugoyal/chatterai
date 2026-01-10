@@ -11,7 +11,6 @@ import { ChatOpenAI } from "@langchain/openai";
 import { LangChainAdapter } from "ai";
 import type { NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
-import { scrapeWithCache } from "@/lib/scraper";
 
 export async function POST(
   req: NextRequest,

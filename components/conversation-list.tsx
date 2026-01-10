@@ -1,7 +1,7 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
-import { MessageSquare, Clock } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 // import { ConversationTable } from "@/lib/db/schema"
 

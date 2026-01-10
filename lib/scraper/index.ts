@@ -91,8 +91,8 @@ export async function scrapeUrl(url: string): Promise<ScrapedData> {
       description,
       content: content.slice(0, 50000), // Limit content size
       headings,
-      links: [...new Set(links)].slice(0, 50), // Unique links, limited
-      images: [...new Set(images)].slice(0, 20), // Unique images, limited
+      links: Array.from(new Set(links)).slice(0, 50), // Unique links, limited
+      images: Array.from(new Set(images)).slice(0, 20), // Unique images, limited
     };
   } catch (error) {
     console.error("Scraping error:", error);
@@ -127,7 +127,7 @@ export async function scrapeSitemap(url: string): Promise<string[]> {
       if (loc) urls.push(loc);
     });
 
-    return [...new Set(urls)].slice(0, 50); // Limit to 50 URLs for now
+    return Array.from(new Set(urls)).slice(0, 50); // Limit to 50 URLs for now
   } catch (error) {
     console.error("Sitemap scraping error:", error);
     // Return empty array instead of throwing, so we can fallback to treating it as regular URL if needed, or just report 0 URLs found

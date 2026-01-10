@@ -155,7 +155,7 @@ export function Header() {
                         signOut();
                       }}
                       className="w-full"
-                      variant="outline"
+                      variant="secondary"
                     >
                       Sign Out
                     </NavbarButton>

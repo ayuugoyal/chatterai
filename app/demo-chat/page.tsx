@@ -9,12 +9,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useChat } from "@ai-sdk/react";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: Date;
-}
+export const dynamic = "force-dynamic";
 
 export default function DemoChatPage() {
   const searchParams = useSearchParams();
@@ -132,7 +127,7 @@ export default function DemoChatPage() {
     // Check if it's a simple greeting
     if (isSimpleGreeting(trimmedInput)) {
       handleGreeting(trimmedInput);
-      handleInputChange({ target: { value: "" } } as any);
+      handleInputChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
     } else {
       // Use AI for non-greeting messages
       handleSubmit(e);
@@ -142,7 +137,7 @@ export default function DemoChatPage() {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleFormSubmit(e as any);
+      handleFormSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
     }
   };
 
@@ -179,7 +174,7 @@ export default function DemoChatPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <AnimatePresence initial={false}>
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 10 }}

@@ -8,7 +8,7 @@ import { requireAuth } from "@/lib/auth/session";
 export async function getAgentConversations(agentId: string) {
   // Ensure user is authorized for this agent?
   // Ideally yes, but for now we trust the caller context or add check
-  const user = await requireAuth();
+  await requireAuth();
 
   try {
     const result = await db.query.conversations.findMany({
@@ -23,7 +23,7 @@ export async function getAgentConversations(agentId: string) {
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const user = await requireAuth();
+  await requireAuth();
   try {
     const result = await db.query.messages.findMany({
       where: eq(messages.conversationId, conversationId),

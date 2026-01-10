@@ -10,7 +10,8 @@
       "Bash(ls:*)",
       "Bash(pnpm lint:*)",
       "Bash(git diff:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(pnpm run build:*)"
     ]
   }
 }

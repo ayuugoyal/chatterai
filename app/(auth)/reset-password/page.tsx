@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

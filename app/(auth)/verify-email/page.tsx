@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function VerifyEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

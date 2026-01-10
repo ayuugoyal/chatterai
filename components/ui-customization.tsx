@@ -12,7 +12,6 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ChatWidgetPreview from "@/components/chat-widget-preview"
 
 const uiFormSchema = z.object({
@@ -46,7 +45,7 @@ const uiFormSchema = z.object({
   allowAttachments: z.boolean(),
 
   // AI Settings
-  maxOutputTokens: z.coerce.number().min(100).max(4000).default(1000)
+  maxOutputTokens: z.coerce.number().min(100).max(4000)
 })
 
 type UIFormValues = z.infer<typeof uiFormSchema>
