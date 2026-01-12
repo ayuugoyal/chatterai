@@ -75,7 +75,7 @@ export default function HeroSection() {
                 <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link href="#demo">
+            <Link href="/demo-chat">
               <Button size="sm" variant="outline" className="text-xs sm:text-base">
                 See Live Demo
               </Button>
