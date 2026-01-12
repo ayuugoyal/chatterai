@@ -81,25 +81,20 @@ export async function createRazorpayCustomer(email: string, name: string) {
     });
 
     return { success: true, customer };
-  } catch (error: any) {
-    // If customer already exists, try to find and return them
-    if (error?.error?.description?.includes("Customer already exists")) {
-      console.log("Customer exists, fetching existing customer for:", email);
-      try {
-        const razorpay = getRazorpayInstance();
-        if (!razorpay) {
-          return { success: false, error: "Razorpay not configured" };
-        }
-
-        // Fetch existing customer by email
-        const customers = await razorpay.customers.all({ email });
-        if (customers.items && customers.items.length > 0) {
-          console.log("Found existing customer:", customers.items[0].id);
-          return { success: true, customer: customers.items[0] };
-        }
-      } catch (fetchError) {
-        console.error("Error fetching existing Razorpay customer:", fetchError);
-      }
+  } catch (error: unknown) {
+    // If customer already exists, return a more specific error
+    const razorpayError = error as { error?: { description?: string } };
+    if (razorpayError?.error?.description?.includes("Customer already exists")) {
+      console.log("⚠️  Customer already exists for email:", email);
+      console.log("💡 This usually means the customer was created in a previous session.");
+      console.log("💡 You can safely ignore this - the system will handle it.");
+      // Return success=false but with a descriptive message
+      // The calling code should handle this by checking if user has a razorpayCustomerId
+      return {
+        success: false,
+        error: "Customer already exists. Please contact support if this persists.",
+        customerExists: true
+      };
     }
 
     console.error("Error creating Razorpay customer:", error);

@@ -42,6 +42,7 @@ const uiFormSchema = z.object({
   showAgentAvatar: z.boolean(),
   showTimestamp: z.boolean(),
   showTypingIndicator: z.boolean(),
+  allowAttachments: z.boolean(), // Hidden from UI, always false
 
   // AI Settings
   maxOutputTokens: z.coerce.number().min(100).max(4000)
@@ -62,6 +63,7 @@ const defaultValues: UIFormValues = {
   showAgentAvatar: true,
   showTimestamp: true,
   showTypingIndicator: true,
+  allowAttachments: false,
   maxOutputTokens: 1000,
 }
 
@@ -101,6 +103,7 @@ export default function UICustomization({
         showAgentAvatar: existingConfig.showAgentAvatar ?? defaultValues.showAgentAvatar,
         showTimestamp: existingConfig.showTimestamp ?? defaultValues.showTimestamp,
         showTypingIndicator: existingConfig.showTypingIndicator ?? defaultValues.showTypingIndicator,
+        allowAttachments: existingConfig.allowAttachments ?? defaultValues.allowAttachments,
         maxOutputTokens: existingConfig.maxOutputTokens || defaultValues.maxOutputTokens,
       }
 
