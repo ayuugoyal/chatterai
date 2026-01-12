@@ -54,19 +54,34 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
 
   // Load Razorpay script
   useEffect(() => {
+    console.log("Loading Razorpay script...");
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
-    script.onload = () => setScriptLoaded(true);
+    script.onload = () => {
+      console.log("✅ Razorpay script loaded successfully");
+      setScriptLoaded(true);
+    };
+    script.onerror = () => {
+      console.error("❌ Failed to load Razorpay script");
+    };
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
   async function handleUpgrade() {
+    console.log("=== UPGRADE BUTTON CLICKED ===");
+    console.log("Script Loaded:", scriptLoaded);
+    console.log("Plan ID:", planId);
+    console.log("Plan Name:", planName);
+
     if (!scriptLoaded) {
+      console.error("Razorpay script not loaded yet");
       toast({
         title: "Error",
         description: "Payment system is loading. Please try again.",
@@ -76,7 +91,9 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
     }
 
     setIsLoading(true);
+    console.log("Creating checkout session...");
     const result = await createCheckoutSession(planId);
+    console.log("Checkout session result:", result);
 
     if (result.error) {
       toast({
@@ -89,6 +106,7 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
     }
 
     if (!result.success || !result.orderId) {
+      console.error("Invalid session result:", result);
       toast({
         title: "Error",
         description: "Failed to create payment session",
@@ -97,6 +115,32 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
       setIsLoading(false);
       return;
     }
+
+    console.log("Razorpay Key ID from result:", result.keyId);
+
+    if (!result.keyId) {
+      console.error("❌ NEXT_PUBLIC_RAZORPAY_KEY_ID is missing! Did you restart the dev server?");
+      toast({
+        title: "Configuration Error",
+        description: "Razorpay key not found. Please restart your dev server after setting NEXT_PUBLIC_RAZORPAY_KEY_ID",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!window.Razorpay) {
+      console.error("❌ window.Razorpay is not available!");
+      toast({
+        title: "Script Error",
+        description: "Razorpay script failed to load. Please refresh the page.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    console.log("✅ All checks passed. Opening Razorpay Checkout...");
 
     // Initialize Razorpay Checkout
     const options = {

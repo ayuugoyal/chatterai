@@ -66,17 +66,8 @@ export async function createCheckoutSession(planId: string) {
       return { error: "Cannot create checkout for free plan" };
     }
 
-    // Check if user already has an active subscription
-    const existingSubscription = await db.query.subscriptions.findFirst({
-      where: and(
-        eq(subscriptions.userId, user.id),
-        eq(subscriptions.status, "active")
-      ),
-    });
-
-    if (existingSubscription) {
-      return { error: "You already have an active subscription. Please cancel it first to upgrade." };
-    }
+    // Note: We allow upgrades even if user has an active subscription
+    // The old subscription will be canceled when the new payment is verified
 
     // Create or get Razorpay customer
     let customerId = "";

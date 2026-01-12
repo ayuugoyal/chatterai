@@ -12,7 +12,10 @@
       "Bash(git diff:*)",
       "Bash(pkill:*)",
       "Bash(pnpm run build:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(findstr:*)",
+      "Bash(pnpm drizzle-kit studio:*)",
+      "Bash(pnpm seed:*)"
     ]
   }
 }
