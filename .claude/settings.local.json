@@ -15,7 +15,8 @@
       "Bash(tail:*)",
       "Bash(findstr:*)",
       "Bash(pnpm drizzle-kit studio:*)",
-      "Bash(pnpm seed:*)"
+      "Bash(pnpm seed:*)",
+      "WebFetch(domain:razorpay.com)"
     ]
   }
 }

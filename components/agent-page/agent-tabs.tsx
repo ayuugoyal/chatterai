@@ -464,37 +464,6 @@ const AgentTabs = (agentData: AgentTable) => {
             <div className="relative">
               <CopyLink name='Shareable Url' baseUrl={testUrl} testButton />
             </div>
-
-            <div>
-              <h3 className="text-sm font-medium mb-4">Preview</h3>
-              <div className="border rounded-lg p-4 relative h-[300px] bg-background">
-                <div className="absolute bottom-4 right-4 flex flex-col items-end">
-                  <div className="w-[250px] h-[200px] bg-card rounded-lg shadow-lg mb-2 border overflow-hidden">
-                    <div className="h-10 border-b flex items-center px-3 bg-background">
-                      <span className="text-sm font-medium">Chat with {agentData.name}</span>
-                    </div>
-                    <div className="p-3 h-[calc(100%-40px)] flex flex-col justify-end">
-                      <div className="bg-muted p-2 rounded text-xs">Hello! How can I help you today?</div>
-                    </div>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-md">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
           </CardContent>
           <CardFooter className="flex justify-between border-t pt-6">
             <Link href={testUrl} target="_blank">

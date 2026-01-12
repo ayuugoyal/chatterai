@@ -91,10 +91,13 @@ export async function createCheckoutSession(planId: string) {
     }
 
     // Create Razorpay order
+    // Receipt must be max 40 chars - using timestamp + short user ID
+    const shortUserId = user.id.substring(0, 8);
+    const receipt = `ord_${Date.now()}_${shortUserId}`;
     const orderResult = await createRazorpayOrder(
       plan.price,
       "INR",
-      `order_${user.id}_${Date.now()}`
+      receipt
     );
 
     if (!orderResult.success || !orderResult.order) {

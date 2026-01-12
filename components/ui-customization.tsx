@@ -42,7 +42,6 @@ const uiFormSchema = z.object({
   showAgentAvatar: z.boolean(),
   showTimestamp: z.boolean(),
   showTypingIndicator: z.boolean(),
-  allowAttachments: z.boolean(),
 
   // AI Settings
   maxOutputTokens: z.coerce.number().min(100).max(4000)
@@ -63,7 +62,6 @@ const defaultValues: UIFormValues = {
   showAgentAvatar: true,
   showTimestamp: true,
   showTypingIndicator: true,
-  allowAttachments: false,
   maxOutputTokens: 1000,
 }
 
@@ -103,7 +101,6 @@ export default function UICustomization({
         showAgentAvatar: existingConfig.showAgentAvatar ?? defaultValues.showAgentAvatar,
         showTimestamp: existingConfig.showTimestamp ?? defaultValues.showTimestamp,
         showTypingIndicator: existingConfig.showTypingIndicator ?? defaultValues.showTypingIndicator,
-        allowAttachments: existingConfig.allowAttachments ?? defaultValues.allowAttachments,
         maxOutputTokens: existingConfig.maxOutputTokens || defaultValues.maxOutputTokens,
       }
 
@@ -491,28 +488,6 @@ export default function UICustomization({
                           onCheckedChange={(value) => {
                             field.onChange(value)
                             updatePreview({ showTypingIndicator: value })
-                          }}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="allowAttachments"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Allow Attachments</FormLabel>
-                        <FormDescription>Enable users to upload files during the chat</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={(value) => {
-                            field.onChange(value)
-                            updatePreview({ allowAttachments: value })
                           }}
                         />
                       </FormControl>

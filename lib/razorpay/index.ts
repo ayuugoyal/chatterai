@@ -11,6 +11,9 @@ function getRazorpayInstance() {
       console.warn("Razorpay credentials not configured. Payment features will be disabled.");
       return null;
     }
+    console.log("🔑 Initializing Razorpay with:");
+    console.log("  Key ID:", process.env.RAZORPAY_KEY_ID);
+    console.log("  Key Secret:", process.env.RAZORPAY_KEY_SECRET ? `${process.env.RAZORPAY_KEY_SECRET.substring(0, 8)}...` : "MISSING");
     razorpayInstance = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID!,
       key_secret: process.env.RAZORPAY_KEY_SECRET!,
@@ -78,7 +81,27 @@ export async function createRazorpayCustomer(email: string, name: string) {
     });
 
     return { success: true, customer };
-  } catch (error) {
+  } catch (error: any) {
+    // If customer already exists, try to find and return them
+    if (error?.error?.description?.includes("Customer already exists")) {
+      console.log("Customer exists, fetching existing customer for:", email);
+      try {
+        const razorpay = getRazorpayInstance();
+        if (!razorpay) {
+          return { success: false, error: "Razorpay not configured" };
+        }
+
+        // Fetch existing customer by email
+        const customers = await razorpay.customers.all({ email });
+        if (customers.items && customers.items.length > 0) {
+          console.log("Found existing customer:", customers.items[0].id);
+          return { success: true, customer: customers.items[0] };
+        }
+      } catch (fetchError) {
+        console.error("Error fetching existing Razorpay customer:", fetchError);
+      }
+    }
+
     console.error("Error creating Razorpay customer:", error);
     return { success: false, error };
   }
