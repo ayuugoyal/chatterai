@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Sparkles, ArrowLeft, Loader2 } from "lucide-react";
@@ -11,7 +11,7 @@ import { useChat } from "@ai-sdk/react";
 
 export const dynamic = "force-dynamic";
 
-export default function DemoChatPage() {
+function DemoChatContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -281,5 +281,20 @@ export default function DemoChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DemoChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading chat...</p>
+        </div>
+      </div>
+    }>
+      <DemoChatContent />
+    </Suspense>
   );
 }

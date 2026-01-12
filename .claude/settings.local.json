@@ -11,7 +11,8 @@
       "Bash(pnpm lint:*)",
       "Bash(git diff:*)",
       "Bash(pkill:*)",
-      "Bash(pnpm run build:*)"
+      "Bash(pnpm run build:*)",
+      "Bash(tail:*)"
     ]
   }
 }
