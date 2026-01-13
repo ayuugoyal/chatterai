@@ -12,12 +12,12 @@ async function seed() {
     {
       name: "Free",
       price: 0,
-      maxAgents: 5,
-      maxConversations: 250, // 50 conversations per agent * 5 agents
+      maxAgents: 1,
+      maxConversations: 50,
       maxUrlsPerAgent: 5,
       features: [
-        "5 AI Agents",
-        "250 conversations/month",
+        "1 AI Agent",
+        "50 conversations/month",
         "5 URLs per agent",
         "Email support",
         "Community access",
@@ -26,12 +26,12 @@ async function seed() {
     {
       name: "Pro",
       price: 50000, // ₹500.00 (in paise for Razorpay)
-      maxAgents: 30,
-      maxConversations: 30000, // 1000 conversations per agent * 30 agents
+      maxAgents: 5,
+      maxConversations: 5000, // 1000 conversations per agent * 5 agents
       maxUrlsPerAgent: 50,
       features: [
-        "30 AI Agents",
-        "30,000 conversations/month",
+        "5 AI Agents",
+        "5,000 conversations/month (1,000 per agent)",
         "50 URLs per agent",
         "Priority support",
         "Advanced analytics",
@@ -71,7 +71,18 @@ async function seed() {
       await db.insert(subscriptionPlans).values(plan);
       console.log(`✅ Created ${plan.name} plan`);
     } else {
-      console.log(`⏭️  ${plan.name} plan already exists`);
+      // Update existing plan with new limits
+      await db
+        .update(subscriptionPlans)
+        .set({
+          price: plan.price,
+          maxAgents: plan.maxAgents,
+          maxConversations: plan.maxConversations,
+          maxUrlsPerAgent: plan.maxUrlsPerAgent,
+          features: plan.features,
+        })
+        .where(eq(subscriptionPlans.name, plan.name));
+      console.log(`🔄 Updated ${plan.name} plan`);
     }
   }
 
