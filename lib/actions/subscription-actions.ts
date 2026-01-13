@@ -16,6 +16,9 @@ export async function getUserSubscription() {
   const user = await requireAuth();
 
   try {
+    // First, check for expired subscriptions and handle them
+    await handleExpiredSubscriptions(user.id);
+
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.userId, user.id),
@@ -30,6 +33,69 @@ export async function getUserSubscription() {
   } catch (error) {
     console.error("Failed to fetch subscription:", error);
     return null;
+  }
+}
+
+/**
+ * Handle expired subscriptions - automatically downgrade to Free plan
+ * This runs every time getUserSubscription is called to ensure subscriptions are current
+ */
+async function handleExpiredSubscriptions(userId: string) {
+  try {
+    // Find all active paid subscriptions that have expired
+    const expiredSubscriptions = await db.query.subscriptions.findMany({
+      where: and(
+        eq(subscriptions.userId, userId),
+        eq(subscriptions.status, "active")
+      ),
+      with: {
+        plan: true,
+      },
+    });
+
+    const now = new Date();
+
+    for (const subscription of expiredSubscriptions) {
+      // Check if subscription has expired and is a paid plan
+      if (subscription.currentPeriodEnd < now && subscription.plan.name !== "Free") {
+        console.log(`⏰ Subscription ${subscription.id} has expired. Downgrading to Free plan.`);
+
+        // Mark current subscription as expired
+        await db
+          .update(subscriptions)
+          .set({
+            status: "expired",
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.id, subscription.id));
+
+        // Get Free plan
+        const freePlan = await db.query.subscriptionPlans.findFirst({
+          where: eq(subscriptionPlans.name, "Free"),
+        });
+
+        if (freePlan) {
+          // Create new Free plan subscription
+          await db.insert(subscriptions).values({
+            userId: userId,
+            planId: freePlan.id,
+            status: "active",
+            currency: "USD",
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+            conversationsUsed: 0,
+            conversationsResetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            // Preserve Razorpay customer ID if it exists
+            razorpayCustomerId: subscription.razorpayCustomerId,
+          });
+
+          console.log(`✅ User ${userId} automatically downgraded to Free plan`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to handle expired subscriptions:", error);
+    // Don't throw - we don't want to break the main flow
   }
 }
 
@@ -71,18 +137,45 @@ export async function createCheckoutSession(planId: string, currency: "INR" | "U
 
     console.log(`💰 Creating checkout session for ${plan.name} plan in ${currency}: ${price / 100} ${currency}`);
 
+    // Check if user has a recently cancelled subscription for the same plan that's still within the billing period
+    const recentCancelledSub = await db.query.subscriptions.findFirst({
+      where: and(
+        eq(subscriptions.userId, user.id),
+        eq(subscriptions.planId, planId),
+        eq(subscriptions.status, "cancelled")
+      ),
+      orderBy: (subscriptions, { desc }) => [desc(subscriptions.updatedAt)],
+    });
+
+    // If they cancelled within the current billing period, reactivate instead of charging again
+    if (recentCancelledSub && recentCancelledSub.currentPeriodEnd > new Date()) {
+      console.log(`♻️ User has a valid cancelled subscription for ${plan.name} plan. Reactivating instead of charging.`);
+      return {
+        reactivate: true,
+        subscriptionId: recentCancelledSub.id,
+      };
+    }
+
     // Note: We allow upgrades even if user has an active subscription
     // The old subscription will be canceled when the new payment is verified
 
     // Create or get Razorpay customer
     let customerId = "";
-    const existingUser = await db.query.subscriptions.findFirst({
+
+    // Try to find ANY existing subscription with a Razorpay customer ID (not just active ones)
+    const existingSubscriptionsWithCustomer = await db.query.subscriptions.findMany({
       where: eq(subscriptions.userId, user.id),
+      orderBy: (subscriptions, { desc }) => [desc(subscriptions.updatedAt)],
     });
 
-    if (existingUser?.razorpayCustomerId) {
-      customerId = existingUser.razorpayCustomerId;
+    // Find the first subscription with a Razorpay customer ID
+    const subWithCustomerId = existingSubscriptionsWithCustomer.find(sub => sub.razorpayCustomerId);
+
+    if (subWithCustomerId?.razorpayCustomerId) {
+      customerId = subWithCustomerId.razorpayCustomerId;
+      console.log(`✅ Found existing Razorpay customer: ${customerId}`);
     } else {
+      console.log(`🆕 Creating new Razorpay customer for ${user.email}`);
       const customerResult = await createRazorpayCustomer(
         user.email,
         user.name || user.email
@@ -93,6 +186,7 @@ export async function createCheckoutSession(planId: string, currency: "INR" | "U
       }
 
       customerId = customerResult.customer.id;
+      console.log(`✅ Created new Razorpay customer: ${customerId}`);
     }
 
     // Create Razorpay order
@@ -186,6 +280,19 @@ export async function verifyPaymentAndActivateSubscription(
     const currentPeriodEnd = new Date();
     currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1); // Monthly subscription
 
+    // Find existing Razorpay customer ID if not provided
+    let finalCustomerId = customerId;
+    if (!finalCustomerId) {
+      const existingSub = await db.query.subscriptions.findFirst({
+        where: eq(subscriptions.userId, user.id),
+        orderBy: (subscriptions, { desc }) => [desc(subscriptions.updatedAt)],
+      });
+      if (existingSub?.razorpayCustomerId) {
+        finalCustomerId = existingSub.razorpayCustomerId;
+        console.log(`ℹ️ Using existing Razorpay customer ID: ${finalCustomerId}`);
+      }
+    }
+
     await db.insert(subscriptions).values({
       userId: user.id,
       planId: plan.id,
@@ -193,7 +300,7 @@ export async function verifyPaymentAndActivateSubscription(
       currency, // Store the currency used for this subscription
       currentPeriodStart,
       currentPeriodEnd,
-      razorpayCustomerId: customerId,
+      razorpayCustomerId: finalCustomerId || customerId,
       razorpayPaymentId: paymentId,
       conversationsUsed: 0,
       conversationsResetAt: currentPeriodEnd,
@@ -329,11 +436,68 @@ export async function switchToFreePlan() {
 
 /**
  * Reactivate cancelled subscription
+ * Used when user wants to resume their subscription or switch back to a paid plan they already paid for
  */
-export async function reactivateSubscription() {
+export async function reactivateSubscription(subscriptionId?: string) {
   const user = await requireAuth();
 
   try {
+    // If subscriptionId is provided, reactivate that specific subscription
+    if (subscriptionId) {
+      console.log(`♻️ Reactivating subscription ${subscriptionId} for user ${user.id}`);
+
+      const subscription = await db.query.subscriptions.findFirst({
+        where: and(
+          eq(subscriptions.id, subscriptionId),
+          eq(subscriptions.userId, user.id)
+        ),
+      });
+
+      if (!subscription) {
+        return { error: "Subscription not found" };
+      }
+
+      // Check if subscription is still within the billing period
+      if (subscription.currentPeriodEnd < new Date()) {
+        return { error: "Subscription period has expired. Please create a new subscription." };
+      }
+
+      // Cancel any other active subscriptions
+      const activeSubscriptions = await db.query.subscriptions.findMany({
+        where: and(
+          eq(subscriptions.userId, user.id),
+          eq(subscriptions.status, "active")
+        ),
+      });
+
+      for (const activeSub of activeSubscriptions) {
+        await db
+          .update(subscriptions)
+          .set({
+            status: "cancelled",
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.id, activeSub.id));
+      }
+
+      // Reactivate the target subscription
+      await db
+        .update(subscriptions)
+        .set({
+          status: "active",
+          cancelAtPeriodEnd: false,
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.id, subscriptionId));
+
+      console.log(`✅ Successfully reactivated subscription ${subscriptionId}`);
+
+      revalidatePath("/dashboard/billing");
+      revalidatePath("/dashboard");
+      return { success: true };
+    }
+
+    // Original logic for reactivating cancelAtPeriodEnd subscriptions
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.userId, user.id),

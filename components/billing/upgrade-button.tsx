@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession, verifyPaymentAndActivateSubscription, switchToFreePlan } from "@/lib/actions/subscription-actions";
+import { createCheckoutSession, verifyPaymentAndActivateSubscription, switchToFreePlan, reactivateSubscription } from "@/lib/actions/subscription-actions";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -61,6 +61,33 @@ export function UpgradeButton({ planId, planName, currency, price }: UpgradeButt
 
   // Load Razorpay script
   useEffect(() => {
+    // Check if script is already loaded
+    if (window.Razorpay) {
+      console.log("✅ Razorpay already loaded from previous session");
+      setScriptLoaded(true);
+      return;
+    }
+
+    // Check if script tag already exists
+    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existingScript) {
+      console.log("⏳ Razorpay script tag exists, checking if loaded...");
+      // Script tag exists, but check if Razorpay is available
+      // Use a small interval to check if Razorpay becomes available
+      const checkInterval = setInterval(() => {
+        if (window.Razorpay) {
+          console.log("✅ Razorpay script loaded successfully");
+          setScriptLoaded(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+
+      // Cleanup function
+      return () => {
+        clearInterval(checkInterval);
+      };
+    }
+
     console.log("Loading Razorpay script...");
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -74,11 +101,8 @@ export function UpgradeButton({ planId, planName, currency, price }: UpgradeButt
     };
     document.body.appendChild(script);
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+    // Don't remove the script on cleanup - let it persist across re-renders
+    // This prevents reload issues when switching between plans
   }, []);
 
   async function handleUpgrade() {
@@ -133,6 +157,28 @@ export function UpgradeButton({ planId, planName, currency, price }: UpgradeButt
         description: result.error,
         variant: "destructive",
       });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if we should reactivate instead of charging
+    if (result.reactivate && result.subscriptionId) {
+      console.log("♻️ Reactivating existing paid subscription instead of charging");
+      const reactivateResult = await reactivateSubscription(result.subscriptionId);
+
+      if (reactivateResult.error) {
+        toast({
+          title: "Error",
+          description: reactivateResult.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: `You've been switched back to ${planName} plan! No additional charge since you already paid for this month.`,
+        });
+        router.refresh();
+      }
       setIsLoading(false);
       return;
     }
@@ -244,13 +290,19 @@ export function UpgradeButton({ planId, planName, currency, price }: UpgradeButt
     });
   }
 
+  // Free plan doesn't need Razorpay script, so don't disable button for it
+  const isFreeplan = planName === "Free" || price === 0;
+  const isDisabled = isLoading || (!isFreeplan && !scriptLoaded);
+
   return (
-    <Button className="w-full" onClick={handleUpgrade} disabled={isLoading || !scriptLoaded}>
+    <Button className="w-full" onClick={handleUpgrade} disabled={isDisabled}>
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </>
+      ) : !isFreeplan && !scriptLoaded ? (
+        "Loading..."
       ) : (
         `Upgrade to ${planName}`
       )}

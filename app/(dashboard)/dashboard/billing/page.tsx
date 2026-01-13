@@ -10,7 +10,17 @@ import { format } from "date-fns";
 
 export default async function BillingPage() {
   const subscription = await getUserSubscription();
-  const plans = await getSubscriptionPlans();
+  const allPlans = await getSubscriptionPlans();
+
+  // Filter plans: hide Free plan if user is on a paid plan
+  const plans = subscription && subscription.plan.name !== "Free"
+    ? allPlans.filter(plan => plan.name !== "Free")
+    : allPlans;
+
+  // Also filter for comparison table
+  const comparisonPlans = subscription && subscription.plan.name !== "Free"
+    ? allPlans.filter(plan => plan.name !== "Free")
+    : allPlans;
 
   return (
     <div className="space-y-8 pb-10">
@@ -117,7 +127,7 @@ export default async function BillingPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-2">Feature</th>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <th key={plan.id} className="text-center py-3 px-2">
                       {plan.name}
                     </th>
@@ -127,7 +137,7 @@ export default async function BillingPage() {
               <tbody className="text-sm">
                 <tr className="border-b">
                   <td className="py-3 px-2">AI Agents</td>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-2">
                       {plan.maxAgents === -1 ? "Unlimited" : plan.maxAgents}
                     </td>
@@ -135,7 +145,7 @@ export default async function BillingPage() {
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-2">Conversations/month</td>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-2">
                       {plan.maxConversations === -1 ? "Unlimited" : plan.maxConversations.toLocaleString()}
                     </td>
@@ -143,7 +153,7 @@ export default async function BillingPage() {
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-2">URLs per Agent</td>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-2">
                       {plan.maxUrlsPerAgent === -1 ? "Unlimited" : plan.maxUrlsPerAgent}
                     </td>
@@ -151,7 +161,7 @@ export default async function BillingPage() {
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-2">Priority Support</td>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-2">
                       {plan.name === "Free" ? (
                         <X className="h-4 w-4 text-muted-foreground inline" />
@@ -163,7 +173,7 @@ export default async function BillingPage() {
                 </tr>
                 <tr>
                   <td className="py-3 px-2">Custom Branding</td>
-                  {plans.map((plan) => (
+                  {comparisonPlans.map((plan) => (
                     <td key={plan.id} className="text-center py-3 px-2">
                       {plan.name === "Free" ? (
                         <X className="h-4 w-4 text-muted-foreground inline" />
