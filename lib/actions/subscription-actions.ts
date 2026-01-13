@@ -50,7 +50,7 @@ export async function getSubscriptionPlans() {
  * Create a Razorpay order for subscription payment
  * This initiates the checkout process
  */
-export async function createCheckoutSession(planId: string) {
+export async function createCheckoutSession(planId: string, currency: "INR" | "USD" = "USD") {
   const user = await requireAuth();
 
   try {
@@ -62,9 +62,14 @@ export async function createCheckoutSession(planId: string) {
       return { error: "Plan not found" };
     }
 
-    if (plan.price === 0) {
+    // Get price based on currency
+    const price = currency === "INR" ? plan.priceINR : plan.priceUSD;
+
+    if (price === 0) {
       return { error: "Cannot create checkout for free plan" };
     }
+
+    console.log(`💰 Creating checkout session for ${plan.name} plan in ${currency}: ${price / 100} ${currency}`);
 
     // Note: We allow upgrades even if user has an active subscription
     // The old subscription will be canceled when the new payment is verified
@@ -95,8 +100,8 @@ export async function createCheckoutSession(planId: string) {
     const shortUserId = user.id.substring(0, 8);
     const receipt = `ord_${Date.now()}_${shortUserId}`;
     const orderResult = await createRazorpayOrder(
-      plan.price,
-      "INR",
+      price,
+      currency,
       receipt
     );
 
@@ -104,11 +109,13 @@ export async function createCheckoutSession(planId: string) {
       return { error: "Failed to create order" };
     }
 
+    console.log(`✅ Razorpay order created: ${orderResult.order.id} for ${currency} ${price / 100}`);
+
     return {
       success: true,
       orderId: orderResult.order.id,
-      amount: plan.price,
-      currency: "INR",
+      amount: price,
+      currency,
       planId: plan.id,
       planName: plan.name,
       customerId,
@@ -129,17 +136,23 @@ export async function verifyPaymentAndActivateSubscription(
   paymentId: string,
   signature: string,
   planId: string,
-  customerId: string
+  customerId: string,
+  currency: "INR" | "USD" = "USD"
 ) {
   const user = await requireAuth();
 
   try {
+    console.log(`🔐 Verifying payment for plan ${planId} in ${currency}`);
+
     // Verify payment signature
     const isValid = verifyRazorpayPayment(orderId, paymentId, signature);
 
     if (!isValid) {
+      console.error("❌ Invalid payment signature");
       return { error: "Invalid payment signature" };
     }
+
+    console.log("✅ Payment signature verified");
 
     const plan = await db.query.subscriptionPlans.findFirst({
       where: eq(subscriptionPlans.id, planId),
@@ -158,6 +171,7 @@ export async function verifyPaymentAndActivateSubscription(
     });
 
     if (existingSubscription) {
+      console.log("🔄 Canceling existing subscription:", existingSubscription.id);
       await db
         .update(subscriptions)
         .set({
@@ -176,6 +190,7 @@ export async function verifyPaymentAndActivateSubscription(
       userId: user.id,
       planId: plan.id,
       status: "active",
+      currency, // Store the currency used for this subscription
       currentPeriodStart,
       currentPeriodEnd,
       razorpayCustomerId: customerId,
@@ -183,6 +198,8 @@ export async function verifyPaymentAndActivateSubscription(
       conversationsUsed: 0,
       conversationsResetAt: currentPeriodEnd,
     });
+
+    console.log(`✅ Subscription activated for ${plan.name} plan in ${currency}`);
 
     revalidatePath("/dashboard/billing");
     revalidatePath("/dashboard");
@@ -245,6 +262,68 @@ export async function cancelSubscription() {
   } catch (error) {
     console.error("Failed to cancel subscription:", error);
     return { error: "Failed to cancel subscription" };
+  }
+}
+
+/**
+ * Switch to Free plan
+ * This is used when user wants to downgrade to Free plan from a paid plan
+ */
+export async function switchToFreePlan() {
+  const user = await requireAuth();
+
+  try {
+    console.log("🆓 Switching to Free plan for user:", user.id);
+
+    // Get Free plan
+    const freePlan = await db.query.subscriptionPlans.findFirst({
+      where: eq(subscriptionPlans.name, "Free"),
+    });
+
+    if (!freePlan) {
+      return { error: "Free plan not found" };
+    }
+
+    // Cancel any existing active subscriptions
+    const existingSubscription = await db.query.subscriptions.findFirst({
+      where: and(
+        eq(subscriptions.userId, user.id),
+        eq(subscriptions.status, "active")
+      ),
+    });
+
+    if (existingSubscription) {
+      console.log("🔄 Canceling existing subscription:", existingSubscription.id);
+      await db
+        .update(subscriptions)
+        .set({
+          status: "cancelled",
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.id, existingSubscription.id));
+    }
+
+    // Create new Free plan subscription
+    await db.insert(subscriptions).values({
+      userId: user.id,
+      planId: freePlan.id,
+      status: "active",
+      currency: "USD", // Default currency for free plan
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      conversationsUsed: 0,
+      conversationsResetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    });
+
+    console.log("✅ Successfully switched to Free plan");
+
+    revalidatePath("/dashboard/billing");
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to switch to Free plan:", error);
+    return { error: "Failed to switch to Free plan" };
   }
 }
 

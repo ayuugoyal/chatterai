@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { getUserSubscription, getSubscriptionPlans } from "@/lib/actions/subscription-actions";
-import { UpgradeButton } from "@/components/billing/upgrade-button";
+import { BillingPlans } from "@/components/billing/billing-plans";
 import { CancelSubscriptionButton } from "@/components/billing/cancel-subscription-button";
 import { format } from "date-fns";
 
@@ -33,7 +33,9 @@ export default async function BillingPage() {
                 <p className="text-sm text-muted-foreground">
                   {subscription.plan.price === 0
                     ? "Free plan"
-                    : `₹${(subscription.plan.price / 100).toFixed(0)}/month`}
+                    : subscription.currency === "INR"
+                    ? `₹${(subscription.plan.priceINR / 100).toFixed(0)}/month`
+                    : `$${(subscription.plan.priceUSD / 100).toFixed(0)}/month`}
                 </p>
               </div>
               <Badge variant={subscription.status === "active" ? "default" : "destructive"}>
@@ -100,56 +102,7 @@ export default async function BillingPage() {
       {/* Available Plans */}
       <div>
         <h2 className="text-2xl font-bold mb-6">Available Plans</h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          {plans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={
-                subscription?.planId === plan.id ? "border-primary shadow-lg" : ""
-              }
-            >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{plan.name}</CardTitle>
-                  {subscription?.planId === plan.id && <Badge>Current</Badge>}
-                </div>
-                <CardDescription>
-                  {plan.price === 0 ? (
-                    <span className="text-3xl font-bold">Free</span>
-                  ) : (
-                    <div>
-                      <span className="text-3xl font-bold">₹{(plan.price / 100).toFixed(0)}</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                  )}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                {subscription?.planId === plan.id ? (
-                  <Button variant="outline" className="w-full" disabled>
-                    Current Plan
-                  </Button>
-                ) : plan.name === "Enterprise" ? (
-                  <Button variant="outline" className="w-full" asChild>
-                    <a href="mailto:support@chatterai.com">Contact Sales</a>
-                  </Button>
-                ) : (
-                  <UpgradeButton planId={plan.id} planName={plan.name} />
-                )}
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <BillingPlans plans={plans} currentPlanId={subscription?.planId} />
       </div>
 
       {/* Features Comparison */}

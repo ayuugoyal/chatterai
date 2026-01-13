@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             {subscription.plan.name === "Free" && usage.agentsUsed >= subscription.plan.maxAgents && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md border border-yellow-200 dark:border-yellow-800">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  ⚠️ You&apos;ve reached your agent limit. <Link href="/dashboard/billing" className="underline font-medium">Upgrade to Pro</Link> to create up to 30 agents!
+                  ⚠️ You&apos;ve reached your agent limit. <Link href="/dashboard/billing" className="underline font-medium">Upgrade to Pro</Link> to create up to 5 agents!
                 </p>
               </div>
             )}
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Welcome to Chatter AI! 🎉</CardTitle>
             <CardDescription>
-              You&apos;re on the Free plan with 5 agents and 250 conversations per month. Create your first AI agent to get started!
+              You&apos;re on the Free plan with 1 agent and 50 conversations per month. Create your first AI agent to get started!
             </CardDescription>
           </CardHeader>
         </Card>

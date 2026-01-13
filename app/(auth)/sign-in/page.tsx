@@ -85,7 +85,8 @@ function SignInContent() {
             Continue with Google
           </Button>
 
-          <div className="relative">
+          {/* Commented out for now - Only using Google OAuth */}
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
@@ -147,7 +148,7 @@ function SignInContent() {
             <Link href="/sign-up" className="text-primary hover:underline">
               Sign up
             </Link>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

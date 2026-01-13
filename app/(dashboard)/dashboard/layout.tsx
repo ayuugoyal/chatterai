@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { signOut } from "@/lib/actions/auth-actions";
 import { getUserSubscription } from "@/lib/actions/subscription-actions";
+import { NavbarLogo } from "@/components/ui/resizable-navbar";
 
 export default async function DashboardLayout({
   children,
@@ -45,11 +46,10 @@ export default async function DashboardLayout({
             </div>
             <div className="flex items-center gap-4">
               {subscription && subscription.plan.name !== "Free" && (
-                <Badge variant="secondary" className={`${
-                  subscription.plan.name === "Pro"
-                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                }`}>
+                <Badge variant="secondary" className={`${subscription.plan.name === "Pro"
+                  ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                  }`}>
                   <Crown className="h-3 w-3 mr-1" />
                   {subscription.plan.name}
                 </Badge>
@@ -67,14 +67,11 @@ export default async function DashboardLayout({
         <div className="flex flex-1">
           <Sidebar>
             <SidebarHeader>
-              <div className="flex items-center gap-2 font-bold text-xl p-4">
-                <Bot className="h-6 w-6" />
-                <span className="group-data-[collapsible=icon]:hidden">Chatter AI</span>
-              </div>
+              <NavbarLogo location={"/dashboard"} />
             </SidebarHeader>
 
             <SidebarContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-2 px-4">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Dashboard">
                     <Link href="/dashboard">

@@ -2,19 +2,34 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useState, useEffect } from "react";
+import { detectCurrency, formatCurrency, type Currency } from "@/lib/utils/currency";
 
-const plans = [
+interface Plan {
+  name: string;
+  priceINR: number;
+  priceUSD: number;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+}
+
+const plans: Plan[] = [
   {
     name: "Free",
-    price: "₹0",
+    priceINR: 0,
+    priceUSD: 0,
     period: "forever",
     description: "Perfect for testing and small projects",
     features: [
-      "5 AI Agents",
-      "250 conversations/month",
+      "1 AI Agent",
+      "50 conversations/month",
       "5 URLs per agent",
       "Email support",
       "Community access",
@@ -25,12 +40,13 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "₹500",
+    priceINR: 500,
+    priceUSD: 6,
     period: "per month",
     description: "Best for growing businesses",
     features: [
-      "30 AI Agents",
-      "30,000 conversations/month",
+      "5 AI Agents",
+      "5,000 conversations/month",
       "50 URLs per agent",
       "Priority support",
       "Advanced analytics",
@@ -43,7 +59,8 @@ const plans = [
   },
   {
     name: "Enterprise",
-    price: "₹2,000",
+    priceINR: 2000,
+    priceUSD: 24,
     period: "per month",
     description: "For large scale operations",
     features: [
@@ -66,6 +83,23 @@ const plans = [
 
 export default function PricingSection() {
   const { isSignedIn } = useAuth();
+  const [currency, setCurrency] = useState<Currency>("USD");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Detect currency on client-side
+    const detectedCurrency = detectCurrency();
+    setCurrency(detectedCurrency);
+    setIsLoading(false);
+  }, []);
+
+  const getPrice = (plan: Plan): string => {
+    const price = currency === "INR" ? plan.priceINR : plan.priceUSD;
+    if (price === 0) {
+      return "Free";
+    }
+    return formatCurrency(price, currency);
+  };
 
   return (
     <section id="pricing" className="py-24 bg-background relative overflow-hidden">
@@ -92,6 +126,14 @@ export default function PricingSection() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Start free, upgrade as you grow. All plans include core features.
           </p>
+          {!isLoading && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <span className="text-sm text-muted-foreground">Prices shown in:</span>
+              <Badge variant="secondary" className="font-mono">
+                {currency}
+              </Badge>
+            </div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -122,8 +164,16 @@ export default function PricingSection() {
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">/{plan.period}</span>
+                  {isLoading ? (
+                    <div className="h-10 w-24 bg-muted animate-pulse rounded"></div>
+                  ) : (
+                    <>
+                      <span className="text-4xl font-bold">{getPrice(plan)}</span>
+                      {(plan.priceINR > 0 || plan.priceUSD > 0) && (
+                        <span className="text-muted-foreground">/{plan.period}</span>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 

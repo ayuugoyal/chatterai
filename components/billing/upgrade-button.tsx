@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession, verifyPaymentAndActivateSubscription } from "@/lib/actions/subscription-actions";
+import { createCheckoutSession, verifyPaymentAndActivateSubscription, switchToFreePlan } from "@/lib/actions/subscription-actions";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -47,7 +47,14 @@ declare global {
   }
 }
 
-export function UpgradeButton({ planId, planName }: { planId: string; planName: string }) {
+interface UpgradeButtonProps {
+  planId: string;
+  planName: string;
+  currency: "INR" | "USD";
+  price: number; // in smallest unit (paise/cents)
+}
+
+export function UpgradeButton({ planId, planName, currency, price }: UpgradeButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const router = useRouter();
@@ -79,6 +86,8 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
     console.log("Script Loaded:", scriptLoaded);
     console.log("Plan ID:", planId);
     console.log("Plan Name:", planName);
+    console.log("Currency:", currency);
+    console.log("Price:", price);
 
     if (!scriptLoaded) {
       console.error("Razorpay script not loaded yet");
@@ -91,8 +100,8 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
     }
 
     setIsLoading(true);
-    console.log("Creating checkout session...");
-    const result = await createCheckoutSession(planId);
+    console.log("Creating checkout session with currency:", currency);
+    const result = await createCheckoutSession(planId, currency);
     console.log("Checkout session result:", result);
 
     if (result.error) {
@@ -158,7 +167,8 @@ export function UpgradeButton({ planId, planName }: { planId: string; planName: 
             response.razorpay_payment_id,
             response.razorpay_signature,
             result.planId!,
-            result.customerId!
+            result.customerId!,
+            currency
           );
 
           if (verifyResult.error) {

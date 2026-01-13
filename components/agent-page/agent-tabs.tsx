@@ -213,7 +213,8 @@ const AgentTabs = (agentData: AgentTable) => {
                   />
                 </div>
 
-                <FormField
+                {/* Model Provider selection - Commented out, using Gemini as default */}
+                {/* <FormField
                   control={form.control}
                   name="modelProvider"
                   render={({ field }) => (
@@ -244,9 +245,10 @@ const AgentTabs = (agentData: AgentTable) => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
-                <div className="space-y-4">
+                {/* Custom API Keys Section - Commented out for now */}
+                {/* <div className="space-y-4">
                   <h3 className="text-sm font-medium">Custom API Keys (Optional)</h3>
                   <p className="text-sm text-muted-foreground">
                     Provide your own API keys or leave blank to use platform keys
@@ -294,7 +296,7 @@ const AgentTabs = (agentData: AgentTable) => {
                       )}
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <FormField
                   control={form.control}

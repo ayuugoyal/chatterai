@@ -29,7 +29,9 @@ export const users = pgTable("users", {
 export const subscriptionPlans = pgTable("subscription_plans", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
   name: varchar("name", { length: 50 }).notNull(), // Free, Pro, Enterprise
-  price: integer("price").notNull().default(0), // in cents
+  price: integer("price").notNull().default(0), // Deprecated: kept for backward compatibility
+  priceINR: integer("price_inr").notNull().default(0), // Price in paise (1 INR = 100 paise)
+  priceUSD: integer("price_usd").notNull().default(0), // Price in cents (1 USD = 100 cents)
   maxAgents: integer("max_agents").notNull().default(1),
   maxConversations: integer("max_conversations").notNull().default(100),
   maxUrlsPerAgent: integer("max_urls_per_agent").notNull().default(5),
@@ -48,6 +50,7 @@ export const subscriptions = pgTable("subscriptions", {
     .notNull()
     .references(() => subscriptionPlans.id),
   status: varchar("status", { length: 20 }).notNull().default("active"), // active, cancelled, expired, past_due
+  currency: varchar("currency", { length: 3 }).notNull().default("USD"), // INR or USD
   currentPeriodStart: timestamp("current_period_start").notNull(),
   currentPeriodEnd: timestamp("current_period_end").notNull(),
   cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),

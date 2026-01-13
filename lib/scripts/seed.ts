@@ -11,7 +11,9 @@ async function seed() {
   const plans = [
     {
       name: "Free",
-      price: 0,
+      price: 0, // Deprecated, kept for backward compatibility
+      priceINR: 0, // Free in INR
+      priceUSD: 0, // Free in USD
       maxAgents: 1,
       maxConversations: 50,
       maxUrlsPerAgent: 5,
@@ -25,7 +27,9 @@ async function seed() {
     },
     {
       name: "Pro",
-      price: 50000, // ₹500.00 (in paise for Razorpay)
+      price: 50000, // Deprecated, kept for backward compatibility
+      priceINR: 50000, // ₹500.00 in paise (1 INR = 100 paise)
+      priceUSD: 600, // $6.00 in cents (1 USD = 100 cents)
       maxAgents: 5,
       maxConversations: 5000, // 1000 conversations per agent * 5 agents
       maxUrlsPerAgent: 50,
@@ -42,7 +46,9 @@ async function seed() {
     },
     {
       name: "Enterprise",
-      price: 200000, // ₹2,000.00 (in paise for Razorpay)
+      price: 200000, // Deprecated, kept for backward compatibility
+      priceINR: 200000, // ₹2,000.00 in paise
+      priceUSD: 2400, // $24.00 in cents (4x Pro price)
       maxAgents: -1, // unlimited
       maxConversations: -1, // unlimited
       maxUrlsPerAgent: -1, // unlimited
@@ -76,13 +82,15 @@ async function seed() {
         .update(subscriptionPlans)
         .set({
           price: plan.price,
+          priceINR: plan.priceINR,
+          priceUSD: plan.priceUSD,
           maxAgents: plan.maxAgents,
           maxConversations: plan.maxConversations,
           maxUrlsPerAgent: plan.maxUrlsPerAgent,
           features: plan.features,
         })
         .where(eq(subscriptionPlans.name, plan.name));
-      console.log(`🔄 Updated ${plan.name} plan`);
+      console.log(`🔄 Updated ${plan.name} plan (₹${plan.priceINR / 100} / $${plan.priceUSD / 100})`);
     }
   }
 

@@ -218,6 +218,15 @@ export async function handleGoogleCallback(googleUser: {
           currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         });
       }
+
+      // Send welcome email to new Google OAuth users
+      try {
+        await sendWelcomeEmail(user.email, user.name || "there");
+        console.log(`✅ Welcome email sent to ${user.email}`);
+      } catch (error) {
+        console.error("Failed to send welcome email:", error);
+        // Don't fail the sign-in if email fails
+      }
     }
   }
 

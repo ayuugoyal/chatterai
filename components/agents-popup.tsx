@@ -179,7 +179,8 @@ export function AgentPopUp() {
                       )}
                     />
 
-                    <FormField
+                    {/* Model Provider selection - Commented out, using Gemini as default */}
+                    {/* <FormField
                       control={form.control}
                       name="modelProvider"
                       render={({ field }) => (
@@ -209,7 +210,7 @@ export function AgentPopUp() {
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
+                    /> */}
 
                     <FormField
                       control={form.control}
@@ -327,8 +328,8 @@ export function AgentPopUp() {
                   </div>
                 </div>
 
-                {/* Custom API Keys Section */}
-                <div className="border-t pt-6">
+                {/* Custom API Keys Section - Commented out for now */}
+                {/* <div className="border-t pt-6">
                   <div className="mb-4">
                     <h3 className="text-lg font-semibold">Custom API Keys (Optional)</h3>
                     <p className="text-sm text-muted-foreground">Provide your own API keys or leave empty to use our platform keys.</p>
@@ -391,7 +392,7 @@ export function AgentPopUp() {
                       )}
                     />
                   </div>
-                </div>
+                </div> */}
 
               </form>
             </Form>
