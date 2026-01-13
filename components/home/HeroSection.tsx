@@ -10,7 +10,7 @@ export default function HeroSection() {
   const { isSignedIn } = useAuth();
 
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
+    <section className="relative pt-24 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
@@ -41,7 +41,7 @@ export default function HeroSection() {
 
           {/* Main Headline */}
           <motion.h1
-            className="text-2xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-center"
+            className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 tracking-tight text-center px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -53,7 +53,7 @@ export default function HeroSection() {
 
           {/* Subheadline */}
           <motion.p
-            className="text-sm md:text-xl mb-8 text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed"
+            className="text-sm sm:text-base md:text-xl mb-6 sm:mb-8 text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -64,19 +64,19 @@ export default function HeroSection() {
 
           {/* CTA Buttons */}
           <motion.div
-            className="flex items-center sm:flex-row gap-4 justify-center mb-12"
+            className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center mb-10 sm:mb-12 px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
-              <Button size="sm" className="gap-2 text-xs sm:text-base">
+            <Link href={isSignedIn ? "/dashboard" : "/sign-up"} className="w-full sm:w-auto">
+              <Button size="default" className="gap-2 text-sm sm:text-base w-full sm:w-auto">
                 {isSignedIn ? "Go to Dashboard" : "Start Free Trial"}
                 <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link href="/demo-chat">
-              <Button size="sm" variant="outline" className="text-xs sm:text-base">
+            <Link href="/demo-chat" className="w-full sm:w-auto">
+              <Button size="default" variant="outline" className="text-sm sm:text-base w-full sm:w-auto">
                 See Live Demo
               </Button>
             </Link>
@@ -84,28 +84,28 @@ export default function HeroSection() {
 
           {/* Trust Indicators */}
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-8 text-xs sm:text-sm text-muted-foreground mb-16"
+            className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-muted-foreground mb-16 px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <div className="flex items-center gap-2">
-              <Bot className="w-4 h-4 text-primary" />
-              <span>5 Free Agents</span>
+              <Bot className="w-4 h-4 text-primary flex-shrink-0" />
+              <span>Free Plan Available</span>
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>250 Free Conversations/month</span>
+              <Zap className="w-4 h-4 text-primary flex-shrink-0" />
+              <span>No Credit Card Required</span>
             </div>
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-primary" />
+              <Globe className="w-4 h-4 text-primary flex-shrink-0" />
               <span>Works on Any Website</span>
             </div>
           </motion.div>
 
           {/* Hero Image/Demo */}
           <motion.div
-            className="relative rounded-xl border border-border bg-background shadow-2xl overflow-hidden"
+            className="relative rounded-xl border border-border bg-background shadow-2xl overflow-hidden mx-2 sm:mx-0"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -116,10 +116,10 @@ export default function HeroSection() {
             }}
           >
             <div className="aspect-video w-full bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center">
-              <div className="text-center p-8">
-                <Bot className="w-16 h-16 mx-auto mb-4 text-primary" />
-                <h3 className="text-2xl font-bold mb-2">See Chatter AI in Action</h3>
-                <p className="text-muted-foreground">Your AI chatbot, ready in minutes</p>
+              <div className="text-center p-4 sm:p-8">
+                <Bot className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-primary" />
+                <h3 className="text-lg sm:text-2xl font-bold mb-2">See Chatter AI in Action</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">Your AI chatbot, ready in minutes</p>
               </div>
             </div>
 

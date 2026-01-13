@@ -53,19 +53,19 @@ export default function HowItWorksSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full uppercase">
             Simple Setup
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How Chatter AI Works</h2>
-          <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 px-2">How Chatter AI Works</h2>
+          <p className="text-base md:text-lg text-foreground/80 max-w-2xl mx-auto px-2">
             Get your AI assistant up and running in three simple steps.
           </p>
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -73,14 +73,14 @@ export default function HowItWorksSection() {
         >
           {steps.map((step, index) => (
             <motion.div key={index} className="relative" variants={itemVariants}>
-              <div className="relative h-full bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
+              <div className="relative h-full bg-card rounded-2xl p-5 md:p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
                 <div
-                  className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${step.color} mb-4`}
+                  className={`inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r ${step.color} mb-3 md:mb-4`}
                 >
-                  <step.icon className="w-6 h-6 text-white" />
+                  <step.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-foreground/80">{step.description}</p>
+                <h3 className="text-lg md:text-xl font-bold mb-2">{step.title}</h3>
+                <p className="text-sm md:text-base text-foreground/80">{step.description}</p>
 
                 {index < steps.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 z-10">

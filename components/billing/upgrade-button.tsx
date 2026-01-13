@@ -89,6 +89,29 @@ export function UpgradeButton({ planId, planName, currency, price }: UpgradeButt
     console.log("Currency:", currency);
     console.log("Price:", price);
 
+    // Check if this is Free plan (price is 0)
+    if (planName === "Free" || price === 0) {
+      console.log("Switching to Free plan (no payment required)");
+      setIsLoading(true);
+      const result = await switchToFreePlan();
+
+      if (result.error) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: "You've successfully switched to the Free plan!",
+        });
+        router.refresh();
+      }
+      setIsLoading(false);
+      return;
+    }
+
     if (!scriptLoaded) {
       console.error("Razorpay script not loaded yet");
       toast({

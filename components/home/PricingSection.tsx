@@ -115,15 +115,15 @@ export default function PricingSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-medium tracking-wider text-primary bg-primary/10 rounded-full uppercase">
             Simple Pricing
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 px-2">
             Choose the <span className="text-gradient">Perfect Plan</span> for Your Business
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Start free, upgrade as you grow. All plans include core features.
           </p>
           {!isLoading && (
@@ -136,7 +136,7 @@ export default function PricingSection() {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
@@ -148,7 +148,7 @@ export default function PricingSection() {
                 plan.popular
                   ? "border-primary shadow-xl shadow-primary/20 bg-gradient-to-b from-primary/5 to-background"
                   : "border-border bg-background"
-              } p-8`}
+              } p-6 md:p-8`}
             >
               {/* Popular badge */}
               {plan.popular && (
@@ -160,28 +160,28 @@ export default function PricingSection() {
                 </div>
               )}
 
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
+              <div className="text-center mb-6 md:mb-8">
+                <h3 className="text-xl md:text-2xl font-bold mb-2">{plan.name}</h3>
+                <p className="text-xs md:text-sm text-muted-foreground mb-4">{plan.description}</p>
                 <div className="flex items-baseline justify-center gap-1">
                   {isLoading ? (
                     <div className="h-10 w-24 bg-muted animate-pulse rounded"></div>
                   ) : (
                     <>
-                      <span className="text-4xl font-bold">{getPrice(plan)}</span>
+                      <span className="text-3xl md:text-4xl font-bold">{getPrice(plan)}</span>
                       {(plan.priceINR > 0 || plan.priceUSD > 0) && (
-                        <span className="text-muted-foreground">/{plan.period}</span>
+                        <span className="text-sm md:text-base text-muted-foreground">/{plan.period}</span>
                       )}
                     </>
                   )}
                 </div>
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2.5 md:space-y-3 mb-6 md:mb-8">
                 {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
+                  <li key={featureIndex} className="flex items-start gap-2 md:gap-3">
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-xs md:text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -217,15 +217,16 @@ export default function PricingSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center mt-12"
+          className="text-center mt-8 md:mt-12 px-4"
         >
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs md:text-sm text-muted-foreground">
             All plans include SSL encryption, automatic backups, and 99.9% uptime SLA.
-            <br />
-            Need a custom plan?{" "}
+            <br className="hidden sm:block" />
+            <span className="block sm:inline mt-1 sm:mt-0">Need a custom plan?{" "}
             <a href="mailto:support@chatterai.com" className="text-primary hover:underline">
               Contact us
             </a>
+            </span>
           </p>
         </motion.div>
       </div>

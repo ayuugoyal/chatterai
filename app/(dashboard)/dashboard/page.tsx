@@ -24,7 +24,11 @@ export default async function DashboardPage() {
             </p>
           )}
         </div>
-        <AgentPopUp />
+        <AgentPopUp
+          currentAgentCount={agents.length}
+          maxAgents={subscription?.plan.maxAgents ?? 1}
+          planName={subscription?.plan.name ?? "Free"}
+        />
       </div>
 
       {/* Subscription & Usage Card */}
@@ -173,7 +177,11 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
                 Create your first AI agent to embed on your website or share with others.
               </p>
-              <AgentPopUp />
+              <AgentPopUp
+                currentAgentCount={agents.length}
+                maxAgents={subscription?.plan.maxAgents ?? 1}
+                planName={subscription?.plan.name ?? "Free"}
+              />
             </CardContent>
           </Card>
         ) : (

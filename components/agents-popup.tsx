@@ -3,6 +3,7 @@ import React from 'react'
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalTrigger } from "@/components/ui/animated-modal"
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -49,10 +50,19 @@ function generateRandomString(length = 6) {
   return result;
 }
 
-export function AgentPopUp() {
+interface AgentPopUpProps {
+  currentAgentCount?: number;
+  maxAgents?: number;
+  planName?: string;
+}
+
+export function AgentPopUp({ currentAgentCount = 0, maxAgents = 1, planName = "Free" }: AgentPopUpProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+
+  // Check if user has reached agent limit
+  const hasReachedLimit = maxAgents !== -1 && currentAgentCount >= maxAgents
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,6 +146,28 @@ export function AgentPopUp() {
                   <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Create New Agent</h1>
                   <p className="text-muted-foreground text-lg">Build a custom AI agent trained on your data.</p>
                 </div>
+
+                {/* Agent Limit Warning */}
+                {hasReachedLimit && (
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">⚠️</span>
+                      <div>
+                        <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+                          Agent Limit Reached
+                        </h3>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
+                          You&apos;ve used all {maxAgents} agent{maxAgents > 1 ? 's' : ''} available on your {planName} plan.
+                        </p>
+                        <Link href="/dashboard/billing">
+                          <Button size="sm" variant="outline" className="mt-2 border-yellow-600 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-900/40">
+                            Upgrade Plan →
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-6">
@@ -401,11 +433,15 @@ export function AgentPopUp() {
             <button
               className="px-6 py-2 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               onClick={handleCreate}
-              disabled={isSubmitting}
+              disabled={isSubmitting || hasReachedLimit}
             >
               {isSubmitting ? (
                 <>
                   <span className="animate-spin">⏳</span> Creating...
+                </>
+              ) : hasReachedLimit ? (
+                <>
+                  <span>🔒</span> Limit Reached
                 </>
               ) : (
                 <>
