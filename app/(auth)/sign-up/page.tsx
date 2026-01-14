@@ -1,21 +1,15 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signUp } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 function SignUpContent() {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Check for OAuth errors in URL
@@ -25,33 +19,6 @@ function SignUpContent() {
       setError(decodeURIComponent(oauthError));
     }
   }, [searchParams]);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    const formData = new FormData(e.currentTarget);
-
-    // Validate password confirmation
-    const password = formData.get("password");
-    const confirmPassword = formData.get("confirmPassword");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    const result = await signUp(formData);
-
-    if (result.error) {
-      setError(result.error);
-      setIsLoading(false);
-    } else {
-      router.push("/dashboard");
-    }
-  }
 
   async function handleGoogleSignUp() {
     // TODO: Implement Google OAuth flow
@@ -68,6 +35,11 @@ function SignUpContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-md">
+              {error}
+            </div>
+          )}
           <Button
             variant="outline"
             className="w-full"

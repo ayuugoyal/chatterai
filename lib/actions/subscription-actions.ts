@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { subscriptions, subscriptionPlans } from "@/lib/db/schema";
+import { subscriptions, subscriptionPlans, agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
@@ -558,7 +558,7 @@ export async function getUsageStatistics() {
 
     // Count agents
     const agentsCount = await db.query.agents.findMany({
-      where: eq(subscriptions.userId, user.id),
+      where: eq(agents.userId, user.id),
     });
 
     // Calculate days until reset

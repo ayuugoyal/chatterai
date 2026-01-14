@@ -309,10 +309,34 @@ async function scrapeUrlForAgent(agentUrlId: string, url: string) {
       // We need to fetch the agentId for this agentUrlId to insert new ones.
       const currentAgentUrl = await db.query.agentUrls.findFirst({
         where: eq(agentUrls.id, agentUrlId),
+        with: {
+          agent: true,
+        },
       });
 
       if (currentAgentUrl) {
-        for (const newUrl of sitemapUrls) {
+        // Get current URL count and subscription limits to enforce URL limits
+        const currentUrlCount = await db.query.agentUrls.findMany({
+          where: eq(agentUrls.agentId, currentAgentUrl.agentId),
+        });
+
+        // Get user's subscription to check URL limit
+        const userSubscription = await db.query.subscriptions.findFirst({
+          where: and(
+            eq(subscriptions.userId, currentAgentUrl.agent.userId),
+            eq(subscriptions.status, "active")
+          ),
+          with: { plan: true },
+        });
+
+        const maxUrlsAllowed = userSubscription?.plan.maxUrlsPerAgent ?? 5;
+        const remainingSlots = Math.max(0, maxUrlsAllowed - currentUrlCount.length);
+
+        // Only process URLs up to the limit
+        const urlsToAdd = sitemapUrls.slice(0, remainingSlots);
+        let addedCount = 0;
+
+        for (const newUrl of urlsToAdd) {
           // Check if already exists for this agent
           const exists = await db.query.agentUrls.findFirst({
             where: and(
@@ -331,16 +355,23 @@ async function scrapeUrlForAgent(agentUrlId: string, url: string) {
               })
               .returning();
 
+            addedCount++;
+
             // Recursively scrape these new URLs (but standard scrape, not sitemap check again to avoid loops)
             // We can just call scrapeUrlForAgent again, but let's be careful about depth.
             // For now, let's just trigger the scrape.
             scrapeUrlForAgent(newAgentUrl.id, newUrl).catch(console.error);
           }
         }
+
+        const limitMessage = sitemapUrls.length > urlsToAdd.length
+          ? ` (Limited to ${addedCount} due to plan limit of ${maxUrlsAllowed} URLs)`
+          : "";
+
         await db
           .update(agentUrls)
           .set({
-            scrapedContent: `Sitemap processed. Found ${sitemapUrls.length} URLs.`,
+            scrapedContent: `Sitemap processed. Found ${sitemapUrls.length} URLs, added ${addedCount}.${limitMessage}`,
             scrapedAt: new Date(),
             status: "scraped",
           })

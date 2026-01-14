@@ -42,7 +42,7 @@ export function detectCurrency(): Currency {
     }
 
     // Method 2: Check browser language
-    const language = navigator.language || (navigator as any).userLanguage;
+    const language = navigator.language || (navigator as unknown as { userLanguage?: string }).userLanguage || "";
     if (language.startsWith("en-IN") || language.startsWith("hi")) {
       return "INR";
     }
@@ -105,6 +105,7 @@ export function convertUSDtoINR(usdAmount: number): number {
  * INR: paise (multiply by 100)
  * USD: cents (multiply by 100)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getRazorpayAmount(amount: number, currency: Currency): number {
   return amount * 100;
 }
