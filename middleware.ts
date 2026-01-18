@@ -16,15 +16,35 @@ const publicRoutes = [
 
 const authRoutes = ["/sign-in", "/sign-up"];
 
+// CORS headers for public API routes
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (
-    publicRoutes.some((route) => pathname.startsWith(route)) ||
+  // Check if this is a public API route used by embed script
+  const isPublicApiRoute =
     pathname.startsWith("/api/chat/") ||
     pathname.startsWith("/api/agents/slug/") ||
-    pathname.match(/^\/api\/agents\/[^/]+\/ui-config$/)
+    pathname.match(/^\/api\/agents\/[^/]+\/ui-config$/);
+
+  // Handle CORS preflight OPTIONS requests for public API routes
+  if (request.method === "OPTIONS" && isPublicApiRoute) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  // Allow public routes and public API routes
+  if (
+    publicRoutes.some((route) => pathname.startsWith(route)) ||
+    isPublicApiRoute
   ) {
     return NextResponse.next();
   }
