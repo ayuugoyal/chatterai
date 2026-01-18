@@ -22,7 +22,9 @@ export async function middleware(request: NextRequest) {
   // Allow public routes
   if (
     publicRoutes.some((route) => pathname.startsWith(route)) ||
-    pathname.startsWith("/api/chat/")
+    pathname.startsWith("/api/chat/") ||
+    pathname.startsWith("/api/agents/slug/") ||
+    pathname.match(/^\/api\/agents\/[^/]+\/ui-config$/)
   ) {
     return NextResponse.next();
   }
