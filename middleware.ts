@@ -27,19 +27,20 @@ const corsHeaders = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if this is a public API route used by embed script
-  const isPublicApiRoute =
-    pathname.startsWith("/api/chat/") ||
-    pathname.startsWith("/api/agents/slug/") ||
-    (pathname.startsWith("/api/agents/") && pathname.endsWith("/ui-config"));
-
-  // Handle CORS preflight OPTIONS requests for public API routes
-  if (request.method === "OPTIONS" && isPublicApiRoute) {
+  // Handle CORS preflight OPTIONS requests for ALL /api/ routes FIRST
+  // This must be at the top before any other logic
+  if (request.method === "OPTIONS" && pathname.startsWith("/api/")) {
     return new NextResponse(null, {
       status: 204,
       headers: corsHeaders,
     });
   }
+
+  // Check if this is a public API route used by embed script
+  const isPublicApiRoute =
+    pathname.startsWith("/api/chat/") ||
+    pathname.startsWith("/api/agents/slug/") ||
+    (pathname.startsWith("/api/agents/") && pathname.endsWith("/ui-config"));
 
   // Allow public routes and public API routes with CORS headers
   if (
