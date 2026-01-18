@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const isPublicApiRoute =
     pathname.startsWith("/api/chat/") ||
     pathname.startsWith("/api/agents/slug/") ||
-    pathname.match(/^\/api\/agents\/[^/]+\/ui-config$/);
+    (pathname.startsWith("/api/agents/") && pathname.endsWith("/ui-config"));
 
   // Handle CORS preflight OPTIONS requests for public API routes
   if (request.method === "OPTIONS" && isPublicApiRoute) {
@@ -41,12 +41,19 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Allow public routes and public API routes
+  // Allow public routes and public API routes with CORS headers
   if (
     publicRoutes.some((route) => pathname.startsWith(route)) ||
     isPublicApiRoute
   ) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    // Add CORS headers to public API routes
+    if (isPublicApiRoute) {
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+    }
+    return response;
   }
 
   // Check for session
