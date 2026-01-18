@@ -42,7 +42,14 @@ export async function getSession() {
     },
   });
 
+  // If session doesn't exist or is expired, clean up and return null
   if (!session || session.expiresAt < new Date()) {
+    if (session) {
+      // Delete expired session from database
+      await db.delete(sessions).where(eq(sessions.token, token));
+    }
+    // Clear the invalid cookie
+    cookieStore.delete(SESSION_COOKIE_NAME);
     return null;
   }
 
@@ -71,4 +78,16 @@ export async function requireAuth() {
     throw new Error("Unauthorized");
   }
   return user;
+}
+
+/**
+ * Clean up all expired sessions from the database
+ * Should be called periodically via cron job
+ */
+export async function cleanupExpiredSessions() {
+  const { lt } = await import("drizzle-orm");
+  const result = await db
+    .delete(sessions)
+    .where(lt(sessions.expiresAt, new Date()));
+  return result;
 }

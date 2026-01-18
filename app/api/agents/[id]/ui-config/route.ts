@@ -3,6 +3,12 @@ import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { uiConfigs, agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { corsJsonResponse, handleCorsPreFlight } from "@/lib/cors";
+
+// Handle preflight OPTIONS request for CORS
+export async function OPTIONS() {
+  return handleCorsPreFlight();
+}
 
 export async function POST(
   req: NextRequest,
@@ -112,18 +118,12 @@ export async function GET(
       where: eq(uiConfigs.agentId, agentId),
     });
 
-    console.log("GET /api/agents/[id]/ui-config - agentId:", agentId);
-    console.log("GET /api/agents/[id]/ui-config - config found:", config ? "YES" : "NO");
-    if (config) {
-      console.log("GET /api/agents/[id]/ui-config - config data:", JSON.stringify(config, null, 2));
-    }
-
-    return NextResponse.json(config || {});
+    return corsJsonResponse(config || {});
   } catch (error) {
     console.error("Error fetching UI configuration:", error);
-    return NextResponse.json(
+    return corsJsonResponse(
       { error: "Failed to fetch UI configuration" },
-      { status: 500 }
+      500
     );
   }
 }

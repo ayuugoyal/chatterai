@@ -1,7 +1,13 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { corsJsonResponse, handleCorsPreFlight } from "@/lib/cors";
+
+// Handle preflight OPTIONS request for CORS
+export async function OPTIONS() {
+  return handleCorsPreFlight();
+}
 
 export async function GET(
   req: NextRequest,
@@ -16,15 +22,12 @@ export async function GET(
     });
 
     if (!agent) {
-      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+      return corsJsonResponse({ error: "Agent not found" }, 404);
     }
 
-    return NextResponse.json(agent);
+    return corsJsonResponse(agent);
   } catch (error) {
     console.error("Error fetching agent by slug:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch agent" },
-      { status: 500 }
-    );
+    return corsJsonResponse({ error: "Failed to fetch agent" }, 500);
   }
 }

@@ -11,6 +11,12 @@ import { ChatOpenAI } from "@langchain/openai";
 import { LangChainAdapter } from "ai";
 import type { NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
+import { corsHeaders, handleCorsPreFlight } from "@/lib/cors";
+
+// Handle preflight OPTIONS request for CORS
+export async function OPTIONS() {
+  return handleCorsPreFlight();
+}
 
 export async function POST(
   req: NextRequest,
@@ -28,7 +34,7 @@ export async function POST(
         JSON.stringify({
           error: "Agent not found",
         }),
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -177,15 +183,22 @@ export async function POST(
     // Create streaming chain
     const stream = await model.stream(messagesWithSystem);
 
-    // Langchain Adapter (ai/rsc) handling
-    return LangChainAdapter.toDataStreamResponse(stream);
+    // Langchain Adapter (ai/rsc) handling with CORS headers
+    const response = LangChainAdapter.toDataStreamResponse(stream);
+
+    // Add CORS headers to streaming response
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
   } catch (error) {
     console.error("Error in chat route:", error);
     return new Response(
       JSON.stringify({
         error: "There was an error processing your request",
       }),
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

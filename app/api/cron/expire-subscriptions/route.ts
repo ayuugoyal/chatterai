@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { subscriptions, subscriptionPlans } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { cleanupExpiredSessions } from "@/lib/auth/session";
 
 /**
  * Cron endpoint to automatically expire subscriptions and downgrade users to Free plan
@@ -88,6 +89,11 @@ export async function GET(request: Request) {
     }
 
     console.log(`✅ Subscription expiry check complete. Expired: ${expiredCount}`);
+
+    // Clean up expired sessions
+    console.log("🧹 Cleaning up expired sessions...");
+    await cleanupExpiredSessions();
+    console.log("✅ Expired sessions cleaned up");
 
     return NextResponse.json({
       success: true,
