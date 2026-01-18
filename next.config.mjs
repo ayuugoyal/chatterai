@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Prevent URL normalization redirects that break CORS
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+
   async headers() {
     return [
       {

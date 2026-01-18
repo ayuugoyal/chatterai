@@ -18,7 +18,10 @@
       "Bash(pnpm seed:*)",
       "WebFetch(domain:razorpay.com)",
       "Bash(wc:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }
